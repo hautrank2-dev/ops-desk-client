@@ -45,7 +45,7 @@ export type AssetItemQueryDto = {
   locationId?: string;
   assetId?: string;
   status?: ItemStatus;
-  include?: string;
+  populations?: ("assetId" | "createdBy" | "updatedBy")[];
 }
 
 export type UpdateAssetItemDto = {

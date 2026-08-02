@@ -20,7 +20,7 @@ export function useAssetItemSection({ assetId }: AssetItemSectionProps) {
     queryFn: async () => {
       const { data } = await httpClient.get<TableResponse<AssetItemModel> | AssetItemModel[]>(
         "/asset-item",
-        { params: { assetId, include: ["createdBy", "updatedBy"] } }
+        { params: { assetId, populations: ["createdBy", "updatedBy"] } }
       );
       return Array.isArray(data) ? data : data.items;
     },

@@ -61,7 +61,7 @@ export default function Page() {
       try {
         const params: Record<string, unknown> = {
           page, pageSize: PAGE_SIZE,
-          include: ["createdBy"],
+          populations: ["createdBy"],
         };
         if (filters.code) params.code = filters.code;
         if (filters.serialNumber) params.serialNumber = filters.serialNumber;
