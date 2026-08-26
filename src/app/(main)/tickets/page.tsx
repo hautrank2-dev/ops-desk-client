@@ -42,9 +42,9 @@ export default function Page() {
       } catch (error) {
         console.error("Failed to fetch tickets", error);
         setTickets([
-          { _id: "1", code: "TKT-001", title: "AC leaking in Room 302", type: TicketType.Repair, priority: TicketPriority.High, status: TicketStatus.Doing, assetItemIds: ["1"], images: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { _id: "2", code: "TKT-002", title: "Annual Server Maintenance", type: TicketType.Maintenance, priority: TicketPriority.Medium, status: TicketStatus.New, assetItemIds: ["2"], images: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { _id: "3", code: "TKT-003", title: "Broken window in lobby", type: TicketType.Incident, priority: TicketPriority.Urgent, status: TicketStatus.Waiting, assetItemIds: ["3"], images: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+          { _id: "1", code: "TKT-001", title: "AC leaking in Room 302", type: TicketType.Repair, priority: TicketPriority.High, status: TicketStatus.Doing, assetItemIds: ["1"], images: [], imageUrls: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+          { _id: "2", code: "TKT-002", title: "Annual Server Maintenance", type: TicketType.Maintenance, priority: TicketPriority.Medium, status: TicketStatus.New, assetItemIds: ["2"], images: [], imageUrls: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+          { _id: "3", code: "TKT-003", title: "Broken window in lobby", type: TicketType.Incident, priority: TicketPriority.Urgent, status: TicketStatus.Waiting, assetItemIds: ["3"], images: [], imageUrls: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
         ]);
         setTotalPage(1);
         setTotal(3);

@@ -14,7 +14,7 @@ export const deptSchema = z.object({
   code: z.string().min(1, "Code is required"),
   name: z.string().min(2, "Name is required"),
   description: z.string().optional(),
-  isActive: z.boolean().default(true),
+  isActive: z.boolean(),
 });
 
 export type DeptFormValues = z.infer<typeof deptSchema>;

@@ -16,7 +16,7 @@ interface PopupConfirmProps {
   title?: string;
   description?: string;
   onConfirm: () => void | Promise<void>;
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
   confirmText?: string;
   cancelText?: string;
   open?: boolean;
@@ -53,15 +53,15 @@ export function PopupConfirm({
 
   return (
     <Dialog open={currentOpen} onOpenChange={handleOpenChange}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      {trigger && <DialogTrigger render={trigger} />}
       <DialogContent showCloseButton={!isLoading}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline" disabled={isLoading}>{cancelText}</Button>
+          <DialogClose render={<Button variant="outline" disabled={isLoading} />}>
+            {cancelText}
           </DialogClose>
           <Button variant="destructive" onClick={handleConfirm} disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

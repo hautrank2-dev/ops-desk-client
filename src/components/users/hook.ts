@@ -17,7 +17,7 @@ export const userSchema = z.object({
   name: z.string().min(2, "Name is required"),
   role: z.enum(["admin", "manager", "user"] as const),
   deptId: z.string().optional(),
-  status: z.enum(["active", "blocked"] as const).default("active"),
+  status: z.enum(["active", "blocked"] as const),
 });
 
 export type UserFormValues = z.infer<typeof userSchema>;

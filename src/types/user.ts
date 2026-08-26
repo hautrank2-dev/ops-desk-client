@@ -20,6 +20,7 @@ export type UserModel = {
   role: UserRole;
   status: UserStatus;
   deptId?: string;
+  avatar?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -16,7 +16,7 @@ export const locationSchema = z.object({
   name: z.string().min(1, "Required"),
   floor: z.string().optional(),
   description: z.string().optional(),
-  isActive: z.boolean().default(true),
+  isActive: z.boolean(),
 });
 
 export type LocationFormValues = z.infer<typeof locationSchema>;
