@@ -57,7 +57,7 @@ export function AssetCombobox({ value, onChange, placeholder = "Filter by assetâ
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "flex h-8 w-full items-center justify-between rounded-md border border-input bg-background px-2.5 text-sm transition-colors hover:bg-muted",
+          "flex h-9 w-full cursor-pointer items-center justify-between rounded-[10px] border border-input bg-card px-3 text-sm shadow-[0_1px_2px_rgb(0_0_0/0.03)] transition-colors hover:border-black/20 dark:bg-white/[0.04] dark:hover:border-white/20",
           !selected && "text-muted-foreground"
         )}
       >
@@ -74,17 +74,17 @@ export function AssetCombobox({ value, onChange, placeholder = "Filter by assetâ
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full min-w-[240px] rounded-md border bg-popover shadow-md">
-          <div className="p-1.5 border-b">
+        <div className="absolute z-50 mt-1.5 w-full min-w-[260px] overflow-hidden rounded-xl bg-popover/95 shadow-float backdrop-blur-xl backdrop-saturate-150">
+          <div className="p-2 border-b border-border">
             <input
               autoFocus
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search code or nameâ€¦"
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground px-1 py-0.5"
+              className="w-full rounded-md bg-muted/70 text-sm outline-none placeholder:text-muted-foreground px-2.5 py-1.5"
             />
           </div>
-          <div className="max-h-52 overflow-y-auto py-1">
+          <div className="max-h-52 overflow-y-auto p-1.5">
             {isFetching ? (
               <div className="flex justify-center py-4">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -97,9 +97,9 @@ export function AssetCombobox({ value, onChange, placeholder = "Filter by assetâ
                   key={a._id}
                   type="button"
                   onClick={() => { onChange(a._id); setOpen(false); }}
-                  className="flex w-full items-center gap-2 px-2.5 py-1.5 text-sm hover:bg-accent cursor-pointer"
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent cursor-pointer"
                 >
-                  <Check className={cn("h-3.5 w-3.5 shrink-0", value === a._id ? "opacity-100" : "opacity-0")} />
+                  <Check className={cn("h-3.5 w-3.5 shrink-0 text-primary", value === a._id ? "opacity-100" : "opacity-0")} />
                   <span className="font-mono text-xs text-muted-foreground">{a.code}</span>
                   <span className="truncate">{a.name}</span>
                 </button>

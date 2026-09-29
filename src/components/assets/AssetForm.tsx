@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { ImageManager } from "@/components/ui/image-manager";
 import { AssetModel, AssetType } from "@/types/asset";
 import { httpClient } from "@/lib/httpClient";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const assetSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters"),
@@ -113,7 +114,7 @@ export function AssetForm({ id }: { id?: string }) {
   const infoContent = (
     <div className="grid gap-4 md:grid-cols-2">
       <Card>
-        <CardHeader><CardTitle className="text-base">Basic Information</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <FormField control={form.control} name="code" render={({ field }) => (
             <FormItem><FormLabel>Asset Code</FormLabel><FormControl><Input placeholder="AST-001" {...field} /></FormControl><FormMessage /></FormItem>
@@ -137,7 +138,7 @@ export function AssetForm({ id }: { id?: string }) {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Details & Logistics</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Details & Logistics</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <FormField control={form.control} name="vendor" render={({ field }) => (
             <FormItem><FormLabel>Vendor</FormLabel><FormControl><Input placeholder="e.g. Apple" {...field} /></FormControl><FormMessage /></FormItem>
@@ -152,7 +153,7 @@ export function AssetForm({ id }: { id?: string }) {
       </Card>
 
       <Card className="md:col-span-2">
-        <CardHeader><CardTitle className="text-base">Description</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Description</CardTitle></CardHeader>
         <CardContent>
           <FormField control={form.control} name="description" render={({ field }) => (
             <FormItem><FormControl><Textarea placeholder="Additional details about the asset..." className="min-h-[100px]" {...field} /></FormControl><FormMessage /></FormItem>
@@ -163,7 +164,7 @@ export function AssetForm({ id }: { id?: string }) {
       {/* Images only shown in create mode here */}
       {!isEdit && (
         <Card className="md:col-span-2">
-          <CardHeader><CardTitle className="text-base">Images</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Images</CardTitle></CardHeader>
           <CardContent>
             <FormField control={form.control} name="images" render={({ field }) => (
               <FormItem>
@@ -179,17 +180,11 @@ export function AssetForm({ id }: { id?: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{isEdit ? "Edit Asset" : "New Asset"}</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {isEdit ? `Editing ${asset?.code}` : "Add a new asset to the system"}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        onBack={() => router.back()}
+        title={isEdit ? "Edit Asset" : "New Asset"}
+        description={isEdit ? `Editing ${asset?.code}` : "Add a new asset to the system"}
+      />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -200,20 +195,20 @@ export function AssetForm({ id }: { id?: string }) {
                 <TabsTrigger value="images">
                   Images
                   {(asset?.imageUrls?.length ?? 0) > 0 && (
-                    <span className="ml-1.5 rounded-full bg-primary/15 text-primary px-1.5 py-0.5 text-[10px] font-semibold">
+                    <span className="ml-0.5 inline-flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-primary/12 text-primary px-1.5 text-[11px] font-semibold tabular-nums">
                       {asset?.imageUrls?.length}
                     </span>
                   )}
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="info" className="mt-4">
+              <TabsContent value="info" className="mt-5">
                 {infoContent}
               </TabsContent>
 
-              <TabsContent value="images" className="mt-4">
+              <TabsContent value="images" className="mt-5">
                 <Card>
-                  <CardHeader><CardTitle className="text-base">Images</CardTitle></CardHeader>
+                  <CardHeader><CardTitle>Images</CardTitle></CardHeader>
                   <CardContent>
                     <ImageManager
                       imageUrls={asset?.imageUrls ?? []}
@@ -231,7 +226,7 @@ export function AssetForm({ id }: { id?: string }) {
           <div className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               {isEdit ? "Update Asset" : "Save Asset"}
             </Button>
           </div>

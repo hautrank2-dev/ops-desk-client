@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ChevronDown, Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronDown, Search, ChevronLeft, ChevronRight, Inbox, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
@@ -156,22 +156,22 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center gap-3">
         {(searchKey || onSearch) && (
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
               placeholder={searchPlaceholder}
               value={searchValue}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-8"
+              className="pl-9"
             />
           </div>
         )}
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <button className="ml-auto inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 h-8 text-sm font-medium transition-all hover:bg-muted" />
+              <button className="ml-auto inline-flex cursor-pointer items-center gap-1.5 rounded-[10px] border border-input bg-card px-3 h-9 text-sm font-medium text-foreground/80 shadow-[0_1px_2px_rgb(0_0_0/0.04)] transition-colors hover:bg-muted hover:text-foreground aria-expanded:bg-muted dark:bg-white/[0.04] dark:hover:bg-white/[0.08]" />
             }
           >
-            Columns <ChevronDown className="ml-2 h-4 w-4" />
+            <SlidersHorizontal className="h-3.5 w-3.5" /> Columns <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {table
@@ -191,13 +191,13 @@ export function DataTable<TData, TValue>({
         </DropdownMenu>
       </div>
 
-      <div className="rounded-lg border bg-card overflow-clip">
+      <div className="rounded-2xl bg-card shadow-soft overflow-clip">
         <Table wrapperClassName="overflow-auto max-h-[calc(100dvh-340px)]">
-          <TableHeader className="sticky top-0 z-10 bg-card">
+          <TableHeader className="sticky top-0 z-10 bg-card/90 backdrop-blur-xl">
             {table.getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id} className="bg-muted/40 hover:bg-muted/40">
+              <TableRow key={hg.id} className="hover:bg-transparent dark:hover:bg-transparent">
                 {hg.headers.map((header) => (
-                  <TableHead key={header.id} className="font-semibold text-xs uppercase tracking-wide text-muted-foreground">
+                  <TableHead key={header.id}>
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
@@ -216,7 +216,7 @@ export function DataTable<TData, TValue>({
                     <TableCell
                       key={cell.id}
                       onClick={cellIndex === 0 && onRowClick ? () => onRowClick(row.original) : undefined}
-                      className={cn(cellIndex === 0 && onRowClick && "hover:text-primary hover:underline font-medium")}
+                      className={cn(cellIndex === 0 && onRowClick && "font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/40")}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
@@ -225,8 +225,13 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                  No results found.
+                <TableCell colSpan={columns.length} className="h-40 text-center text-muted-foreground">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                      <Inbox className="h-5 w-5 text-muted-foreground/70" />
+                    </span>
+                    <span className="text-sm">No results found.</span>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
@@ -235,13 +240,13 @@ export function DataTable<TData, TValue>({
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-[13px] text-muted-foreground tabular-nums">
           {total !== undefined ? `${total} total records` : `${table.getFilteredRowModel().rows.length} records`}
         </p>
         {(isServerPagination ? pages > 1 : table.getPageCount() > 1) && (
           <div className="flex items-center gap-1">
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon-sm"
               onClick={() => onPageChange?.(currentPage - 1)}
               disabled={currentPage <= 1}
@@ -254,8 +259,9 @@ export function DataTable<TData, TValue>({
               ) : (
                 <Button
                   key={p}
-                  variant={p === currentPage ? "default" : "outline"}
+                  variant="ghost"
                   size="icon-sm"
+                  className={cn("tabular-nums text-[13px]", p === currentPage && "bg-primary/10 text-primary hover:bg-primary/15 shadow-none")}
                   onClick={() => onPageChange?.(p as number)}
                 >
                   {p}
@@ -263,7 +269,7 @@ export function DataTable<TData, TValue>({
               )
             )}
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon-sm"
               onClick={() => onPageChange?.(currentPage + 1)}
               disabled={currentPage >= pages}

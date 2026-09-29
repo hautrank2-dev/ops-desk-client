@@ -64,7 +64,7 @@ export function PopupConfirm({
             {cancelText}
           </DialogClose>
           <Button variant="destructive" onClick={handleConfirm} disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             {confirmText}
           </Button>
         </DialogFooter>

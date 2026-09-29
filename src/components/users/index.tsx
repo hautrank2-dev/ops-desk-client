@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Pencil, Trash2, Loader2, MoreHorizontal } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, MoreHorizontal, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -10,18 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { TablePagination } from "@/components/ui/table-pagination";
+import { StatusPill } from "@/components/ui/status-pill";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { USER_ROLE_TONE, USER_STATUS_TONE } from "@/constants/tones";
 import { useUsers } from "./hook";
-
-const roleStyles: Record<string, string> = {
-  admin: "bg-violet-100 text-violet-700 border-violet-200",
-  manager: "bg-sky-100 text-sky-700 border-sky-200",
-  user: "bg-slate-100 text-slate-600 border-slate-200",
-};
-
-const statusStyles: Record<string, string> = {
-  active: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  blocked: "bg-red-100 text-red-600 border-red-200",
-};
 
 export function UserList() {
   const {
@@ -35,36 +27,39 @@ export function UserList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Users</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage system users and their roles.</p>
-        </div>
-        <Button onClick={openCreate}>
-          <Plus className="mr-2 h-4 w-4" /> Add User
-        </Button>
-      </div>
+      <PageHeader
+        title="Users"
+        description="Manage system users and their roles."
+        actions={
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4" /> Add User
+          </Button>
+        }
+      />
 
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <Input
-            placeholder="Search users..."
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="max-w-sm"
-          />
-          <span className="text-sm text-muted-foreground ml-auto">{total} total</span>
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Search users..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="pl-9"
+            />
+          </div>
+          <span className="text-[13px] text-muted-foreground ml-auto tabular-nums">{total} total</span>
         </div>
 
-        <div className="rounded-lg border bg-card overflow-clip">
+        <div className="rounded-2xl bg-card shadow-soft overflow-clip">
           <Table wrapperClassName="overflow-auto max-h-[calc(100dvh-340px)]">
-            <TableHeader className="sticky top-0 z-10 bg-card">
-              <TableRow className="bg-muted/40 hover:bg-muted/40">
-                <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">User</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">Username</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">Role</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">Status</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">Department</TableHead>
+            <TableHeader className="sticky top-0 z-10 bg-card/90 backdrop-blur-xl">
+              <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+                <TableHead>User</TableHead>
+                <TableHead>Username</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Department</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -77,16 +72,16 @@ export function UserList() {
                 </TableRow>
               ) : items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">No users found.</TableCell>
+                  <TableCell colSpan={6} className="h-40 text-center text-muted-foreground">No users found.</TableCell>
                 </TableRow>
               ) : items.map((user) => {
                 const dept = departments.find((d) => d._id === user.deptId);
                 return (
                   <TableRow key={user._id}>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-7 w-7">
-                          <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="text-xs font-semibold">
                             {user.name.slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
@@ -96,32 +91,32 @@ export function UserList() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono text-sm">{user.username}</TableCell>
+                    <TableCell className="font-mono text-[13px] text-foreground/80">{user.username}</TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${roleStyles[user.role] ?? ""}`}>
+                      <StatusPill tone={USER_ROLE_TONE[user.role] ?? "gray"} className="capitalize">
                         {user.role}
-                      </span>
+                      </StatusPill>
                     </TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${statusStyles[user.status] ?? ""}`}>
+                      <StatusPill dot tone={USER_STATUS_TONE[user.status] ?? "gray"} className="capitalize">
                         {user.status}
-                      </span>
+                      </StatusPill>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{dept?.name ?? "—"}</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0" />}>
+                        <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" className="rounded-full text-muted-foreground" />}>
                           <MoreHorizontal className="h-4 w-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEdit(user)}>
-                            <Pencil className="mr-2 h-4 w-4" /> Edit
+                            <Pencil className="h-4 w-4" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
                             onClick={() => deleteMutation.mutate(user._id)}
                           >
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                            <Trash2 className="h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -220,7 +215,7 @@ export function UserList() {
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
                 <Button type="submit" disabled={isPending}>
-                  {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                   {editing ? "Update" : "Create"}
                 </Button>
               </DialogFooter>

@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 interface TablePaginationProps {
   page: number
@@ -25,13 +26,13 @@ function getPageNumbers(page: number, totalPage: number): (number | "...")[] {
 export function TablePagination({ page, totalPage, total, onPageChange }: TablePaginationProps) {
   return (
     <div className="flex items-center justify-between">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-[13px] text-muted-foreground tabular-nums">
         {total !== undefined ? `${total} total records` : ""}
       </p>
       {totalPage > 1 && (
         <div className="flex items-center gap-1">
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon-sm"
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
@@ -44,8 +45,9 @@ export function TablePagination({ page, totalPage, total, onPageChange }: TableP
             ) : (
               <Button
                 key={p}
-                variant={p === page ? "default" : "outline"}
+                variant="ghost"
                 size="icon-sm"
+                className={cn("tabular-nums text-[13px]", p === page && "bg-primary/10 text-primary hover:bg-primary/15 shadow-none")}
                 onClick={() => onPageChange(p as number)}
               >
                 {p}
@@ -53,7 +55,7 @@ export function TablePagination({ page, totalPage, total, onPageChange }: TableP
             )
           )}
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon-sm"
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPage}

@@ -11,7 +11,7 @@ type Props = {
 export function AssetImagesTab({ assetId, imageUrls }: Props) {
   return (
     <Card>
-      <CardHeader><CardTitle className="text-base">Images</CardTitle></CardHeader>
+      <CardHeader><CardTitle>Images</CardTitle></CardHeader>
       <CardContent>
         <ImageManager
           imageUrls={imageUrls}

@@ -1,14 +1,18 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StatusPill } from "@/components/ui/status-pill";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { TICKET_PRIORITY_TONE, TICKET_STATUS_TONE } from "@/constants/tones";
+import { TicketPriority, TicketStatus } from "@/types/ticket";
 import { Package, Ticket, Building2, Users, AlertCircle, CheckCircle2, Clock, TrendingUp } from "lucide-react";
 
 export default function Page() {
   const stats = [
-    { title: "Total Assets", value: "1,284", icon: Package, bg: "bg-violet-100 dark:bg-violet-900/30", color: "text-violet-600 dark:text-violet-400", trend: "+12 this month" },
-    { title: "Active Tickets", value: "42", icon: Ticket, bg: "bg-amber-100 dark:bg-amber-900/30", color: "text-amber-600 dark:text-amber-400", trend: "8 urgent" },
-    { title: "Departments", value: "12", icon: Building2, bg: "bg-sky-100 dark:bg-sky-900/30", color: "text-sky-600 dark:text-sky-400", trend: "2 new" },
-    { title: "Staff Members", value: "86", icon: Users, bg: "bg-emerald-100 dark:bg-emerald-900/30", color: "text-emerald-600 dark:text-emerald-400", trend: "+3 this week" },
+    { title: "Total Assets", value: "1,284", icon: Package, bg: "bg-gradient-to-b from-[#2997ff] to-[#0062d1]", color: "text-white", trend: "+12 this month" },
+    { title: "Active Tickets", value: "42", icon: Ticket, bg: "bg-gradient-to-b from-[#ffb340] to-[#ff8a00]", color: "text-white", trend: "8 urgent" },
+    { title: "Departments", value: "12", icon: Building2, bg: "bg-gradient-to-b from-[#7d7aff] to-[#5046e5]", color: "text-white", trend: "2 new" },
+    { title: "Staff Members", value: "86", icon: Users, bg: "bg-gradient-to-b from-[#4cd964] to-[#28a745]", color: "text-white", trend: "+3 this week" },
   ];
 
   const recentTickets = [
@@ -18,92 +22,77 @@ export default function Page() {
     { id: "4", title: "Light Replacement", status: "Done", priority: "Low", time: "1d ago" },
   ];
 
-  const priorityStyle: Record<string, string> = {
-    Urgent: "bg-rose-100 text-rose-700 border-rose-200",
-    High: "bg-amber-100 text-amber-700 border-amber-200",
-    Medium: "bg-sky-100 text-sky-700 border-sky-200",
-    Low: "bg-slate-100 text-slate-600 border-slate-200",
-  };
-
-  const statusStyle: Record<string, string> = {
-    New: "bg-slate-100 text-slate-600",
-    Doing: "bg-violet-100 text-violet-700",
-    Waiting: "bg-amber-100 text-amber-700",
-    Done: "bg-emerald-100 text-emerald-700",
-  };
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">Welcome back. Here's what's happening today.</p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader title="Dashboard" description="Welcome back. Here's what's happening today." />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.title} className="border shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                  <p className="text-3xl font-bold mt-1">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                    <TrendingUp className="h-3 w-3" /> {stat.trend}
-                  </p>
-                </div>
-                <div className={`${stat.bg} p-2.5 rounded-xl`}>
-                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
+          <Card key={stat.title} className="gap-0 py-5 transition-all duration-300 ease-apple hover:-translate-y-0.5 hover:shadow-elevated">
+            <CardContent className="px-5">
+              <div className="flex items-center justify-between">
+                <p className="text-[13px] font-medium text-muted-foreground">{stat.title}</p>
+                <div className={`${stat.bg} h-9 w-9 rounded-[10px] flex items-center justify-center shadow-[0_1px_2px_rgb(0_0_0/0.12),inset_0_1px_0_rgb(255_255_255/0.25)]`}>
+                  <stat.icon className={`h-[18px] w-[18px] ${stat.color}`} strokeWidth={2.1} />
                 </div>
               </div>
+              <p className="text-[34px] leading-none font-semibold tracking-[-0.03em] tabular-nums mt-3">{stat.value}</p>
+              <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+                <TrendingUp className="h-3.5 w-3.5 text-[#28a745] dark:text-[#30d158]" /> {stat.trend}
+              </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-7">
-        <Card className="lg:col-span-4 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Recent Tickets</CardTitle>
+        <Card className="lg:col-span-4 gap-2">
+          <CardHeader>
+            <CardTitle>Recent Tickets</CardTitle>
           </CardHeader>
-          <CardContent className="divide-y divide-border">
-            {recentTickets.map((ticket) => (
-              <div key={ticket.id} className="flex items-center gap-3 py-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{ticket.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{ticket.time}</p>
+          <CardContent className="px-3">
+            <div className="divide-y divide-border">
+              {recentTickets.map((ticket) => (
+                <div key={ticket.id} className="flex items-center gap-3 rounded-xl px-3 py-3.5 transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03]">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{ticket.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{ticket.time}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <StatusPill tone={TICKET_PRIORITY_TONE[ticket.priority as TicketPriority] ?? "gray"}>
+                      {ticket.priority}
+                    </StatusPill>
+                    <StatusPill dot tone={TICKET_STATUS_TONE[ticket.status as TicketStatus] ?? "gray"}>
+                      {ticket.status}
+                    </StatusPill>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${priorityStyle[ticket.priority] || ""}`}>
-                    {ticket.priority}
-                  </span>
-                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusStyle[ticket.status] || "bg-slate-100 text-slate-600"}`}>
-                    {ticket.status}
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-3 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">System Status</CardTitle>
+        <Card className="lg:col-span-3 gap-2">
+          <CardHeader>
+            <CardTitle>System Status</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {[
-              { label: "API Gateway", status: "Operational", icon: CheckCircle2, color: "text-emerald-500" },
-              { label: "Database Cluster", status: "Operational", icon: CheckCircle2, color: "text-emerald-500" },
-              { label: "Background Jobs", status: "Processing delay (2m)", icon: Clock, color: "text-amber-500" },
-              { label: "Storage Service", status: "Maintenance scheduled", icon: AlertCircle, color: "text-rose-500" },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50">
-                <item.icon className={`h-4 w-4 shrink-0 ${item.color}`} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.status}</p>
+          <CardContent className="px-3">
+            <div className="divide-y divide-border">
+              {[
+                { label: "API Gateway", status: "Operational", icon: CheckCircle2, color: "text-[#28a745] dark:text-[#30d158]" },
+                { label: "Database Cluster", status: "Operational", icon: CheckCircle2, color: "text-[#28a745] dark:text-[#30d158]" },
+                { label: "Background Jobs", status: "Processing delay (2m)", icon: Clock, color: "text-[#ff9f0a]" },
+                { label: "Storage Service", status: "Maintenance scheduled", icon: AlertCircle, color: "text-[#ff3b30] dark:text-[#ff453a]" },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-3 px-3 py-3.5">
+                  <item.icon className={`h-[18px] w-[18px] shrink-0 ${item.color}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{item.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{item.status}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

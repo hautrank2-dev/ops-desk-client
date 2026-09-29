@@ -11,17 +11,13 @@ import { AssetItemModel, ItemStatus, TableResponse } from "@/types";
 import { useApp } from "@/contexts/AppContext";
 import { httpClient } from "@/lib/httpClient";
 import { formatDate } from "@/lib/formatDate";
+import { StatusPill } from "@/components/ui/status-pill";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ITEM_STATUS_TONE } from "@/constants/tones";
 
 const PAGE_SIZE = 20;
 
 const STATUS_OPTIONS = Object.values(ItemStatus).map((s) => ({ label: s, value: s }));
-
-const statusStyles: Record<ItemStatus, string> = {
-  [ItemStatus.Available]: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  [ItemStatus.InUse]: "bg-blue-100 text-blue-700 border-blue-200",
-  [ItemStatus.UnderMaintenance]: "bg-amber-100 text-amber-700 border-amber-200",
-  [ItemStatus.Retired]: "bg-slate-100 text-slate-500 border-slate-200",
-};
 
 type Filters = {
   code: string;
@@ -89,7 +85,7 @@ export default function Page() {
       accessorKey: "code",
       header: "Code",
       cell: ({ row }) => (
-        <span className="font-mono text-xs font-semibold text-primary">
+        <span className="font-mono text-[13px] font-medium text-primary">
           {row.original.code ?? row.original._id.slice(-8).toUpperCase()}
         </span>
       ),
@@ -103,7 +99,7 @@ export default function Page() {
         if (typeof a === "object") {
           return (
             <span
-              className="font-mono text-xs text-primary cursor-pointer hover:underline"
+              className="font-mono text-[13px] text-primary cursor-pointer hover:underline underline-offset-4"
               onClick={() => router.push(`/assets/${a._id}/asset-item`)}
             >
               {a.code}
@@ -126,9 +122,9 @@ export default function Page() {
       cell: ({ row }) => {
         const s = row.original.status;
         return (
-          <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${statusStyles[s]}`}>
+          <StatusPill dot tone={ITEM_STATUS_TONE[s]}>
             {s}
-          </span>
+          </StatusPill>
         );
       },
     },
@@ -150,7 +146,7 @@ export default function Page() {
       accessorKey: "createdAt",
       header: "Created",
       cell: ({ row }) => (
-        <span className="text-muted-foreground text-xs" title={row.getValue("createdAt")}>
+        <span className="text-muted-foreground text-[13px] tabular-nums" title={row.getValue("createdAt")}>
           {formatDate(row.getValue("createdAt"))}
         </span>
       ),
@@ -158,11 +154,8 @@ export default function Page() {
   ];
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Asset Items</h1>
-        <p className="text-sm text-muted-foreground mt-1">All registered asset items across the organization.</p>
-      </div>
+    <div className="space-y-6">
+      <PageHeader title="Asset Items" description="All registered asset items across the organization." />
 
       <FilterBar hasFilters={hasFilters} onClear={() => { setFilters(EMPTY); setPage(1); }}>
         <DebouncedInput value={filters.code} onChange={set("code")} placeholder="Code…" className="w-32" />

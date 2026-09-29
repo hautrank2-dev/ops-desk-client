@@ -62,7 +62,7 @@ export function LocationForm({ open, onOpenChange, form, onSubmit, isPending, is
             )} />
 
             <FormField control={form.control} name="isActive" render={({ field }) => (
-              <FormItem className="flex items-center justify-between rounded-lg border p-3">
+              <FormItem className="flex items-center justify-between space-y-0 rounded-xl bg-muted/60 px-4 py-3">
                 <FormLabel className="mb-0">Active</FormLabel>
                 <FormControl>
                   <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -73,7 +73,7 @@ export function LocationForm({ open, onOpenChange, form, onSubmit, isPending, is
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button type="submit" disabled={isPending}>
-                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isEdit ? "Update" : "Create"}
               </Button>
             </DialogFooter>

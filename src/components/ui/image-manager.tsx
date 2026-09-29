@@ -54,22 +54,22 @@ export function ImageManager({ imageUrls, basePath, invalidateKeys = [], classNa
     <div className={cn("space-y-3", className)}>
       {/* Existing images grid */}
       {imageUrls.length > 0 && (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
           {imageUrls.map((path, i) => {
             const url = fileUrl(path);
             return (
-              <div key={i} className="relative group aspect-square rounded-md overflow-hidden border bg-muted">
+              <div key={i} className="relative group aspect-square rounded-xl overflow-hidden bg-muted shadow-soft">
                 <img
                   src={url}
                   alt={`Image ${i + 1}`}
-                  className="w-full h-full object-cover cursor-pointer"
+                  className="w-full h-full object-cover cursor-zoom-in transition-transform duration-300 ease-apple group-hover:scale-[1.03]"
                   onClick={() => setPreviewing(url)}
                 />
                 <button
                   type="button"
                   disabled={deleteMutation.isPending}
                   onClick={() => deleteMutation.mutate(i)}
-                  className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                  className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-black/55 text-white backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer disabled:opacity-50"
                 >
                   {deleteMutation.isPending
                     ? <Loader2 className="h-3 w-3 animate-spin" />
@@ -87,11 +87,11 @@ export function ImageManager({ imageUrls, basePath, invalidateKeys = [], classNa
         onClick={() => inputRef.current?.click()}
         onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
         onDragOver={(e) => e.preventDefault()}
-        className="flex items-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/30 px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors"
+        className="flex items-center justify-center gap-2 rounded-xl border-[1.5px] border-dashed border-black/15 bg-muted/40 px-4 py-4 cursor-pointer transition-colors duration-200 hover:border-primary/50 hover:bg-primary/[0.03] dark:border-white/15"
       >
         {uploadMutation.isPending
           ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-          : <ImagePlus className="h-4 w-4 text-muted-foreground" />
+          : <ImagePlus className="h-4 w-4 text-primary" />
         }
         <span className="text-sm text-muted-foreground">
           {uploadMutation.isPending ? "Uploading…" : "Click or drag to add images"}
@@ -109,13 +109,13 @@ export function ImageManager({ imageUrls, basePath, invalidateKeys = [], classNa
       {/* Lightbox */}
       {previewing && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md"
           onClick={() => setPreviewing(null)}
         >
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-4 right-4 text-white hover:bg-white/10"
+            className="absolute top-4 right-4 rounded-full bg-white/10 text-white hover:bg-white/20 hover:text-white"
             onClick={() => setPreviewing(null)}
           >
             <X className="h-5 w-5" />
@@ -123,7 +123,7 @@ export function ImageManager({ imageUrls, basePath, invalidateKeys = [], classNa
           <img
             src={previewing}
             alt="Preview"
-            className="max-w-[90vw] max-h-[90vh] rounded-lg object-contain"
+            className="max-w-[90vw] max-h-[90vh] rounded-2xl object-contain shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           />
         </div>

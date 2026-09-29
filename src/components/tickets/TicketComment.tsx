@@ -72,9 +72,9 @@ export function TicketComment({ ticketId }: { ticketId: string }) {
   };
 
   return (
-    <Card className="mt-6">
+    <Card className="mt-2">
       <CardHeader>
-        <CardTitle className="text-base text-primary">Comments & Activity</CardTitle>
+        <CardTitle>Comments & Activity</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Comment Form */}
@@ -88,7 +88,7 @@ export function TicketComment({ ticketId }: { ticketId: string }) {
                   <FormControl>
                     <Textarea
                       placeholder="Add a comment or update..."
-                      className="min-h-[80px]"
+                      className="min-h-[88px]"
                       {...field}
                     />
                   </FormControl>
@@ -104,8 +104,8 @@ export function TicketComment({ ticketId }: { ticketId: string }) {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium">Attach Images (Max 5)</span>
-                      <Button type="button" variant="ghost" size="sm" onClick={() => {
+                      <span className="text-[13px] font-medium">Attach Images (Max 5)</span>
+                      <Button type="button" variant="ghost" size="icon-sm" className="rounded-full text-muted-foreground" onClick={() => {
                         setShowImageUpload(false);
                         form.setValue("images", []);
                       }}>
@@ -129,14 +129,14 @@ export function TicketComment({ ticketId }: { ticketId: string }) {
                 onClick={() => setShowImageUpload(true)}
                 disabled={showImageUpload}
               >
-                <ImageIcon className="h-4 w-4 mr-2" />
+                <ImageIcon className="h-4 w-4" />
                 Add Images
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
                 {createMutation.isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Send className="mr-2 h-4 w-4" />
+                  <Send className="h-4 w-4" />
                 )}
                 Post
               </Button>
@@ -145,13 +145,13 @@ export function TicketComment({ ticketId }: { ticketId: string }) {
         </Form>
 
         {/* Comment List */}
-        <div className="space-y-4 pt-4 border-t">
+        <div className="space-y-3 pt-5 border-t border-border">
           {isLoading ? (
             <div className="flex justify-center py-4">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : comments.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground py-4">
+            <p className="text-center text-sm text-muted-foreground py-8">
               No comments yet.
             </p>
           ) : (

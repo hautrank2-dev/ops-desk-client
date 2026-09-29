@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ChevronLeft, Save, Loader2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -106,9 +106,9 @@ export function TicketForm({ id }: { id?: string }) {
 
   const infoContent = (
     <div>
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle className="text-base">Ticket Information</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Ticket Information</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <FormField control={form.control} name="code" render={({ field }) => (
               <FormItem><FormLabel>Ticket Code</FormLabel><FormControl><Input placeholder="TKT-001" {...field} /></FormControl><FormMessage /></FormItem>
@@ -152,7 +152,7 @@ export function TicketForm({ id }: { id?: string }) {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Analysis & Notes</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Analysis & Notes</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <FormField control={form.control} name="cause" render={({ field }) => (
               <FormItem><FormLabel>Root Cause</FormLabel><FormControl><Input placeholder="e.g. Blocked drainage pipe" {...field} /></FormControl><FormMessage /></FormItem>
@@ -164,7 +164,7 @@ export function TicketForm({ id }: { id?: string }) {
         </Card>
 
         <Card className="md:col-span-2">
-          <CardHeader><CardTitle className="text-base">Description</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Description</CardTitle></CardHeader>
           <CardContent>
             <FormField control={form.control} name="description" render={({ field }) => (
               <FormItem><FormControl><Textarea placeholder="Detailed description of the issue..." className="min-h-[100px]" {...field} /></FormControl><FormMessage /></FormItem>
@@ -174,7 +174,7 @@ export function TicketForm({ id }: { id?: string }) {
 
         {!isEdit && (
           <Card className="md:col-span-2">
-            <CardHeader><CardTitle className="text-base">Images</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Images</CardTitle></CardHeader>
             <CardContent>
               <FormField control={form.control} name="images" render={({ field }) => (
                 <FormItem>
@@ -192,22 +192,27 @@ export function TicketForm({ id }: { id?: string }) {
 
   return (
     <div className="space-y-6">
-      <div className="sticky top-[var(--header-height)] z-20 -mx-4 px-4 py-3 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">{isEdit ? "Edit Ticket" : "New Ticket"}</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+      <div className="sticky top-[var(--header-height)] z-20 -mx-4 -mt-6 px-4 sm:-mx-6 sm:px-6 md:-mx-8 md:-mt-8 md:px-8 py-3.5 glass border-b border-border flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            aria-label="Go back"
+            className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-card text-foreground/70 shadow-soft transition-all duration-200 ease-apple hover:text-foreground active:scale-95"
+          >
+            <ChevronLeft className="size-5 -translate-x-px" />
+          </button>
+          <div className="min-w-0">
+            <h1 className="text-xl leading-tight font-semibold tracking-[-0.02em] truncate">{isEdit ? "Edit Ticket" : "New Ticket"}</h1>
+            <p className="text-[13px] text-muted-foreground mt-0.5 truncate">
               {isEdit ? `Editing ${ticket?.code}` : "Create a new maintenance ticket"}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
           <Button type="submit" form="ticket-form" disabled={isPending}>
-            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {isEdit ? "Update Ticket" : "Create Ticket"}
           </Button>
         </div>
@@ -222,20 +227,20 @@ export function TicketForm({ id }: { id?: string }) {
                 <TabsTrigger value="images">
                   Images
                   {(ticket?.imageUrls?.length ?? 0) > 0 && (
-                    <span className="ml-1.5 rounded-full bg-primary/15 text-primary px-1.5 py-0.5 text-[10px] font-semibold">
+                    <span className="ml-0.5 inline-flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-primary/12 text-primary px-1.5 text-[11px] font-semibold tabular-nums">
                       {ticket?.imageUrls?.length}
                     </span>
                   )}
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="info" className="mt-4">
+              <TabsContent value="info" className="mt-5">
                 {infoContent}
               </TabsContent>
 
-              <TabsContent value="images" className="mt-4">
+              <TabsContent value="images" className="mt-5">
                 <Card>
-                  <CardHeader><CardTitle className="text-base">Images</CardTitle></CardHeader>
+                  <CardHeader><CardTitle>Images</CardTitle></CardHeader>
                   <CardContent>
                     <ImageManager
                       imageUrls={ticket?.imageUrls.map(e => fileUrl(e)) ?? []}

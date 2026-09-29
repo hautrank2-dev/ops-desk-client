@@ -109,8 +109,8 @@ export function TicketCommentItem({
 
   if (isEditing) {
     return (
-      <div className="flex gap-4 p-4 rounded-lg bg-muted/50 border border-primary/20">
-        <Avatar className="h-10 w-10">
+      <div className="flex gap-3.5 p-4 rounded-2xl bg-primary/[0.04] ring-1 ring-primary/20">
+        <Avatar className="h-9 w-9">
           <AvatarImage src={fileUrl(comment.createdBy?.avatar)} />
           <AvatarFallback>{comment.createdBy?.name?.charAt(0) || "U"}</AvatarFallback>
         </Avatar>
@@ -136,13 +136,13 @@ export function TicketCommentItem({
                   <p className="text-xs font-medium text-muted-foreground">Current Images:</p>
                   <div className="flex flex-wrap gap-2">
                     {keptImages.map((img, idx) => (
-                      <div key={idx} className="relative h-16 w-16 rounded-md overflow-hidden border group">
+                      <div key={idx} className="relative h-16 w-16 rounded-lg overflow-hidden shadow-soft group">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={fileUrl(img)} alt={`kept-${idx}`} className="object-cover w-full h-full" />
                         <button
                           type="button"
                           onClick={() => handleRemoveKeptImage(img)}
-                          className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                          className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer"
                         >
                           <Trash className="h-4 w-4 text-white" />
                         </button>
@@ -186,7 +186,7 @@ export function TicketCommentItem({
                   Cancel
                 </Button>
                 <Button type="submit" size="sm" disabled={updateMutation.isPending}>
-                  {updateMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                  {updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   Save
                 </Button>
               </div>
@@ -198,15 +198,15 @@ export function TicketCommentItem({
   }
 
   return (
-    <div className={`flex gap-4 p-4 rounded-lg bg-muted/30 group ${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
-      <Avatar className="h-10 w-10">
+    <div className={`flex gap-3.5 rounded-2xl px-2 py-3 transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02] group ${disabled ? 'opacity-60 pointer-events-none' : ''}`}>
+      <Avatar className="h-9 w-9">
         <AvatarImage src={fileUrl(comment.createdBy?.avatar)} />
         <AvatarFallback>{comment.createdBy?.name?.charAt(0) || "U"}</AvatarFallback>
       </Avatar>
-      <div className="flex-1 space-y-2">
-        <div className="flex items-center justify-between">
+      <div className="flex-1 min-w-0 space-y-1.5">
+        <div className="flex items-center justify-between min-h-8">
           <div>
-            <span className="font-semibold text-sm mr-2">
+            <span className="font-semibold text-sm tracking-[-0.01em] mr-2">
               {comment.createdBy?.name || "Unknown User"}
             </span>
             <span className="text-xs text-muted-foreground">
@@ -217,7 +217,7 @@ export function TicketCommentItem({
           <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
             {isOwner && (
               <>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onEditStart} disabled={disabled}>
+                <Button variant="ghost" size="icon-sm" className="rounded-full" onClick={onEditStart} disabled={disabled}>
                   <Edit2 className="h-4 w-4 text-muted-foreground" />
                 </Button>
                 <PopupConfirm
@@ -229,7 +229,7 @@ export function TicketCommentItem({
                   }}
                   isLoading={deleteMutation.isPending}
                   trigger={
-                    <Button variant="ghost" size="icon" className="h-8 w-8" disabled={disabled || deleteMutation.isPending}>
+                    <Button variant="ghost" size="icon-sm" className="rounded-full hover:bg-destructive/10" disabled={disabled || deleteMutation.isPending}>
                       <Trash className="h-4 w-4 text-destructive" />
                     </Button>
                   }
@@ -238,12 +238,12 @@ export function TicketCommentItem({
             )}
           </div>
         </div>
-        <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
+        <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">{comment.content}</p>
 
         {comment.imgUrls && comment.imgUrls.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
             {comment.imgUrls.map((img, idx) => (
-              <div key={idx} className="relative h-20 w-20 rounded-md overflow-hidden border">
+              <div key={idx} className="relative h-20 w-20 rounded-xl overflow-hidden shadow-soft">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={fileUrl(img)}

@@ -15,7 +15,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         {/* Fixed sidebar — desktop only */}
         <aside
           className="fixed top-0 left-0 h-screen z-30 hidden md:block"
-          style={{ width: sidebarW, transition: "width 200ms" }}
+          style={{ width: sidebarW, transition: "width 200ms cubic-bezier(0.25, 0.1, 0.25, 1)" }}
         >
           <Sidebar collapsed={collapsed} onToggle={toggle} className="h-full" />
         </aside>
@@ -29,7 +29,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             <Header />
           </header>
           <main>
-            <div className="p-6 md:p-8 max-w-screen-2xl mx-auto space-y-6">
+            <div className="px-4 py-6 sm:px-6 md:px-8 md:py-8 max-w-[1440px] mx-auto space-y-6">
               {children}
             </div>
           </main>
@@ -43,7 +43,7 @@ function SidebarSpacer({ sidebarW, children }: { sidebarW: number; children: Rea
   return (
     <>
       <style>{`@media (min-width: 768px) { .sidebar-offset { margin-left: ${sidebarW}px; } }`}</style>
-      <div className="sidebar-offset" style={{ transition: "margin-left 200ms" }}>
+      <div className="sidebar-offset" style={{ transition: "margin-left 200ms cubic-bezier(0.25, 0.1, 0.25, 1)" }}>
         {children}
       </div>
     </>

@@ -12,16 +12,11 @@ import { AssetItemModel, ItemStatus } from "@/types/asset-item";
 import { useApp } from "@/contexts/AppContext";
 import { formatDate } from "@/lib/formatDate";
 import { UserCell } from "@/components/ui/user-cell";
+import { StatusPill } from "@/components/ui/status-pill";
+import { ITEM_STATUS_TONE } from "@/constants/tones";
 import { AssetItemForm } from "./AssetItemForm";
 import { AssetItemEditForm } from "./AssetItemEditForm";
 import { type AssetItemSectionProps, useAssetItemSection } from "./hook";
-
-const statusStyles: Record<ItemStatus, string> = {
-  [ItemStatus.Available]: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  [ItemStatus.InUse]: "bg-blue-100 text-blue-700 border-blue-200",
-  [ItemStatus.UnderMaintenance]: "bg-amber-100 text-amber-700 border-amber-200",
-  [ItemStatus.Retired]: "bg-slate-100 text-slate-500 border-slate-200",
-};
 
 function LocationCell({ item }: { item: AssetItemModel }) {
   const { locationsMap } = useApp();
@@ -37,7 +32,7 @@ function buildColumns(onEdit: (item: AssetItemModel) => void): ColumnDef<AssetIt
       accessorKey: "code",
       header: "Code",
       cell: ({ row }) => (
-        <span className="font-mono text-xs font-semibold text-primary">
+        <span className="font-mono text-[13px] font-medium text-primary">
           {row.original.code ?? row.original._id.slice(-8).toUpperCase()}
         </span>
       ),
@@ -55,9 +50,9 @@ function buildColumns(onEdit: (item: AssetItemModel) => void): ColumnDef<AssetIt
       cell: ({ row }) => {
         const s = row.original.status;
         return (
-          <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${statusStyles[s]}`}>
+          <StatusPill dot tone={ITEM_STATUS_TONE[s]}>
             {s}
-          </span>
+          </StatusPill>
         );
       },
     },
@@ -75,7 +70,7 @@ function buildColumns(onEdit: (item: AssetItemModel) => void): ColumnDef<AssetIt
       accessorKey: "createdAt",
       header: "Created",
       cell: ({ row }) => (
-        <span className="text-muted-foreground text-xs" title={row.getValue("createdAt")}>
+        <span className="text-muted-foreground text-[13px] tabular-nums" title={row.getValue("createdAt")}>
           {formatDate(row.getValue("createdAt"))}
         </span>
       ),
@@ -83,7 +78,7 @@ function buildColumns(onEdit: (item: AssetItemModel) => void): ColumnDef<AssetIt
     {
       id: "actions",
       cell: ({ row }) => (
-        <Button variant="ghost" size="icon-sm" onClick={(e) => { e.stopPropagation(); onEdit(row.original); }}>
+        <Button variant="ghost" size="icon-sm" className="rounded-full text-muted-foreground" onClick={(e) => { e.stopPropagation(); onEdit(row.original); }}>
           <Pencil className="h-3.5 w-3.5" />
         </Button>
       ),
@@ -113,49 +108,48 @@ export function AssetItemSection(props: AssetItemSectionProps) {
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-3">
+    <div>
+      <div className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle className="text-base">Asset Items</CardTitle>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <CardTitle>Asset Items</CardTitle>
+          <p className="text-[13px] text-muted-foreground mt-0.5 tabular-nums">
             {items.length} item{items.length !== 1 ? "s" : ""} registered
           </p>
         </div>
         <Button size="sm" onClick={() => setAddOpen(true)}>
-          <Plus className="mr-1.5 h-3.5 w-3.5" /> Add Items
+          <Plus className="h-3.5 w-3.5" /> Add Items
         </Button>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-3">
+      <div className="space-y-4">
         {/* Bulk action bar — only visible when rows are selected */}
         {selected.length > 0 && (
-          <div className="flex items-center gap-2 rounded-lg border bg-muted/50 px-3 py-2">
-            <span className="text-xs text-muted-foreground shrink-0">
+          <div className="flex items-center gap-2 rounded-xl bg-primary/[0.06] ring-1 ring-primary/15 px-3 py-2 animate-in fade-in-0 slide-in-from-top-1 duration-200">
+            <span className="text-[13px] font-medium text-primary shrink-0 tabular-nums">
               {selected.length} selected
             </span>
             <Select value={bulkStatus} onValueChange={(v) => setBulkStatus(v as ItemStatus)}>
-              <SelectTrigger className="h-7 w-44 text-xs">
+              <SelectTrigger size="sm" className="w-44 text-[13px] bg-card">
                 <SelectValue placeholder="Change status…" />
               </SelectTrigger>
               <SelectContent>
                 {Object.values(ItemStatus).map((s) => (
-                  <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>
+                  <SelectItem key={s} value={s} className="text-[13px]">{s}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Button
               size="sm"
-              className="h-7 text-xs"
               disabled={!bulkStatus || bulkStatusMutation.isPending}
               onClick={handleBulkApply}
             >
-              {bulkStatusMutation.isPending && <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />}
+              {bulkStatusMutation.isPending && <Loader2 className="h-3 w-3 animate-spin" />}
               Apply
             </Button>
             <Button
               size="sm"
               variant="ghost"
-              className="h-7 text-xs ml-auto"
+              className="ml-auto text-muted-foreground"
               onClick={() => setSelected([])}
             >
               Clear
@@ -164,12 +158,14 @@ export function AssetItemSection(props: AssetItemSectionProps) {
         )}
 
         {isLoading ? (
-          <div className="flex justify-center py-8">
+          <div className="flex justify-center py-12">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-10 gap-2 text-muted-foreground">
-            <Package className="h-8 w-8 opacity-30" />
+          <div className="flex flex-col items-center justify-center py-14 gap-3 text-muted-foreground">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <Package className="h-6 w-6 text-muted-foreground/70" />
+            </span>
             <p className="text-sm">No items yet. Add some items to track.</p>
           </div>
         ) : (
@@ -181,7 +177,7 @@ export function AssetItemSection(props: AssetItemSectionProps) {
             onSelectionChange={setSelected}
           />
         )}
-      </CardContent>
+      </div>
 
       {/* Add dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
@@ -208,6 +204,6 @@ export function AssetItemSection(props: AssetItemSectionProps) {
           )}
         </DialogContent>
       </Dialog>
-    </Card>
+    </div>
   );
 }

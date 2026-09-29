@@ -98,10 +98,10 @@ export function AssetInfoTab({ asset, isCreate }: Props) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((v) => mutation.mutate(v))} className="space-y-4">
+      <form onSubmit={form.handleSubmit((v) => mutation.mutate(v))} className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
-            <CardHeader><CardTitle className="text-base">Basic Information</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <FormField control={form.control} name="code" render={({ field }) => (
                 <FormItem><FormLabel>Asset Code</FormLabel><FormControl><Input placeholder="AST-001" {...field} /></FormControl><FormMessage /></FormItem>
@@ -125,7 +125,7 @@ export function AssetInfoTab({ asset, isCreate }: Props) {
           </Card>
 
           <Card>
-            <CardHeader><CardTitle className="text-base">Details & Logistics</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Details & Logistics</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <FormField control={form.control} name="vendor" render={({ field }) => (
                 <FormItem><FormLabel>Vendor</FormLabel><FormControl><Input placeholder="e.g. Apple" {...field} /></FormControl><FormMessage /></FormItem>
@@ -140,7 +140,7 @@ export function AssetInfoTab({ asset, isCreate }: Props) {
           </Card>
 
           <Card className="md:col-span-2">
-            <CardHeader><CardTitle className="text-base">Description</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Description</CardTitle></CardHeader>
             <CardContent>
               <FormField control={form.control} name="description" render={({ field }) => (
                 <FormItem><FormControl><Textarea placeholder="Additional details..." className="min-h-[100px]" {...field} /></FormControl><FormMessage /></FormItem>
@@ -150,7 +150,7 @@ export function AssetInfoTab({ asset, isCreate }: Props) {
 
           {isCreate && (
             <Card className="md:col-span-2">
-              <CardHeader><CardTitle className="text-base">Images</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Images</CardTitle></CardHeader>
               <CardContent>
                 <FormField control={form.control} name="images" render={({ field }) => (
                   <FormItem><FormControl><ImageUpload value={field.value ?? []} onChange={field.onChange} /></FormControl><FormMessage /></FormItem>
@@ -160,10 +160,10 @@ export function AssetInfoTab({ asset, isCreate }: Props) {
           )}
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-2.5">
           <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
           <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {isCreate ? "Save Asset" : "Update Asset"}
           </Button>
         </div>

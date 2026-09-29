@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { StatusPill } from "@/components/ui/status-pill";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useDepartments } from "./hook";
 
 const STATUS_OPTIONS = [
@@ -29,15 +31,15 @@ export function DepartmentList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Departments</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage organizational departments.</p>
-        </div>
-        <Button onClick={openCreate}>
-          <Plus className="mr-2 h-4 w-4" /> Add Department
-        </Button>
-      </div>
+      <PageHeader
+        title="Departments"
+        description="Manage organizational departments."
+        actions={
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4" /> Add Department
+          </Button>
+        }
+      />
 
       <FilterBar hasFilters={hasFilters} onClear={clearFilters}>
         <DebouncedInput
@@ -56,17 +58,17 @@ export function DepartmentList() {
           options={STATUS_OPTIONS}
           className="w-32"
         />
-        <span className="text-sm text-muted-foreground ml-auto self-end pb-0.5">{total} total</span>
+        <span className="text-[13px] text-muted-foreground ml-auto self-end pb-2 tabular-nums">{total} total</span>
       </FilterBar>
 
-      <div className="rounded-lg border overflow-hidden">
+      <div className="rounded-2xl bg-card shadow-soft overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">Code</TableHead>
-              <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">Name</TableHead>
-              <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">Description</TableHead>
-              <TableHead className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">Status</TableHead>
+            <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
+              <TableHead>Code</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -79,33 +81,33 @@ export function DepartmentList() {
               </TableRow>
             ) : items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">No departments found.</TableCell>
+                <TableCell colSpan={5} className="h-40 text-center text-muted-foreground">No departments found.</TableCell>
               </TableRow>
             ) : items.map((dept) => (
               <TableRow key={dept._id}>
-                <TableCell className="font-mono font-semibold text-primary">{dept.code}</TableCell>
+                <TableCell className="font-mono text-[13px] font-medium text-primary">{dept.code}</TableCell>
                 <TableCell className="font-medium">{dept.name}</TableCell>
                 <TableCell className="text-muted-foreground text-sm">{dept.description ?? "—"}</TableCell>
                 <TableCell>
                   {dept.isActive
-                    ? <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-xs font-semibold">Active</span>
-                    : <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-500 border border-slate-200 px-2.5 py-0.5 text-xs font-semibold">Inactive</span>
+                    ? <StatusPill dot tone="green">Active</StatusPill>
+                    : <StatusPill dot tone="gray">Inactive</StatusPill>
                   }
                 </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
-                    <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0" />}>
+                    <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" className="rounded-full text-muted-foreground" />}>
                       <MoreHorizontal className="h-4 w-4" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => openEdit(dept)}>
-                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                        <Pencil className="h-4 w-4" /> Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
                         onClick={() => deleteMutation.mutate(dept._id)}
                       >
-                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                        <Trash2 className="h-4 w-4" /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -117,9 +119,9 @@ export function DepartmentList() {
       </div>
 
       {totalPage > 1 && (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-3">
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>Previous</Button>
-          <span className="text-sm text-muted-foreground">Page {page} / {totalPage}</span>
+          <span className="text-[13px] text-muted-foreground tabular-nums">Page {page} / {totalPage}</span>
           <Button variant="outline" size="sm" disabled={page >= totalPage} onClick={() => setPage(page + 1)}>Next</Button>
         </div>
       )}
@@ -151,7 +153,7 @@ export function DepartmentList() {
                 </FormItem>
               )} />
               <FormField control={form.control} name="isActive" render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-3">
+                <FormItem className="flex items-center justify-between space-y-0 rounded-xl bg-muted/60 px-4 py-3">
                   <FormLabel className="cursor-pointer">Active</FormLabel>
                   <FormControl>
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -161,7 +163,7 @@ export function DepartmentList() {
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
                 <Button type="submit" disabled={isPending}>
-                  {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                   {editing ? "Update" : "Create"}
                 </Button>
               </DialogFooter>

@@ -12,8 +12,8 @@ import { ChevronDownIcon, CheckIcon } from "lucide-react";
 function FilterLabel({ label, children }: { label?: string; children: React.ReactNode }) {
   if (!label) return <>{children}</>;
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] font-medium text-muted-foreground leading-none px-0.5 select-none">
+    <div className="flex flex-col gap-1.5">
+      <span className="text-xs font-medium text-muted-foreground leading-none px-0.5 select-none">
         {label}
       </span>
       {children}
@@ -55,12 +55,12 @@ export function DebouncedInput({
   return (
     <FilterLabel label={label}>
       <div className={cn("relative", className)}>
-        {icon && <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />}
+        {icon && <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />}
         <Input
           value={local}
           onChange={(e) => handle(e.target.value)}
           placeholder={placeholder}
-          className={cn("h-8 text-sm", icon && "pl-8")}
+          className={cn("h-9 text-sm", icon && "pl-8.5")}
         />
       </div>
     </FilterLabel>
@@ -90,10 +90,10 @@ export function FilterSelect({ value, onChange, placeholder, label, options, cla
       >
         <SelectPrimitive.Trigger
           className={cn(
-            "flex h-8 w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm whitespace-nowrap transition-colors outline-none select-none",
-            "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+            "flex h-9 w-full cursor-pointer items-center justify-between gap-1.5 rounded-[10px] border border-input bg-card px-3 py-1 text-sm whitespace-nowrap shadow-[0_1px_2px_rgb(0_0_0/0.03)] transition-[border-color,box-shadow] duration-200 outline-none select-none hover:border-black/20 dark:hover:border-white/20",
+            "focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-ring/15",
             "disabled:cursor-not-allowed disabled:opacity-50",
-            "dark:bg-input/30 dark:hover:bg-input/50",
+            "dark:bg-white/[0.04]",
             className
           )}
         >
@@ -106,18 +106,18 @@ export function FilterSelect({ value, onChange, placeholder, label, options, cla
 
         <SelectPrimitive.Portal>
           <SelectPrimitive.Positioner side="bottom" sideOffset={4} className="isolate z-50">
-            <SelectPrimitive.Popup className="relative isolate z-50 max-h-60 w-(--anchor-width) min-w-36 overflow-y-auto rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 p-1 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95">
+            <SelectPrimitive.Popup className="relative isolate z-50 max-h-60 w-(--anchor-width) min-w-36 overflow-y-auto rounded-xl bg-popover/95 text-popover-foreground shadow-float backdrop-blur-xl backdrop-saturate-150 p-1.5 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95">
               <SelectPrimitive.List>
                 {/* "All" option */}
                 <SelectPrimitive.Item
                   value=""
-                  className="relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50"
+                  className="relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1.5 pr-8 pl-2 text-sm outline-hidden select-none transition-colors focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50"
                 >
                   <SelectPrimitive.ItemText className="flex flex-1 text-muted-foreground">
                     {placeholder}
                   </SelectPrimitive.ItemText>
                   <SelectPrimitive.ItemIndicator className="pointer-events-none absolute right-2 flex size-4 items-center justify-center">
-                    <CheckIcon className="size-3.5" />
+                    <CheckIcon className="size-3.5 text-primary" />
                   </SelectPrimitive.ItemIndicator>
                 </SelectPrimitive.Item>
 
@@ -125,13 +125,13 @@ export function FilterSelect({ value, onChange, placeholder, label, options, cla
                   <SelectPrimitive.Item
                     key={o.value}
                     value={o.value}
-                    className="relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50"
+                    className="relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1.5 pr-8 pl-2 text-sm outline-hidden select-none transition-colors focus:bg-accent focus:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50"
                   >
                     <SelectPrimitive.ItemText className="flex flex-1">
                       {o.label}
                     </SelectPrimitive.ItemText>
                     <SelectPrimitive.ItemIndicator className="pointer-events-none absolute right-2 flex size-4 items-center justify-center">
-                      <CheckIcon className="size-3.5" />
+                      <CheckIcon className="size-3.5 text-primary" />
                     </SelectPrimitive.ItemIndicator>
                   </SelectPrimitive.Item>
                 ))}
@@ -153,10 +153,10 @@ type FilterBarProps = {
 
 export function FilterBar({ children, onClear, hasFilters }: FilterBarProps) {
   return (
-    <div className="flex flex-wrap items-end gap-2">
+    <div className="flex flex-wrap items-end gap-2.5">
       {children}
       {hasFilters && onClear && (
-        <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground self-end" onClick={onClear}>
+        <Button variant="ghost" size="sm" className="h-9 text-[13px] text-muted-foreground self-end" onClick={onClear}>
           <X className="h-3 w-3 mr-1" /> Clear
         </Button>
       )}

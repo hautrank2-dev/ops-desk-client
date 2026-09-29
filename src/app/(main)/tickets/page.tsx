@@ -19,6 +19,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { TicketModel, TicketPriority, TicketStatus, TicketType, TableResponse } from "@/types";
 import { httpClient } from "@/lib/httpClient";
+import { StatusPill } from "@/components/ui/status-pill";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { TICKET_PRIORITY_TONE, TICKET_STATUS_TONE } from "@/constants/tones";
 
 const PAGE_SIZE = 10;
 
@@ -57,7 +60,7 @@ export default function Page() {
     {
       accessorKey: "code",
       header: "Code",
-      cell: ({ row }) => <span className="font-mono font-semibold text-primary">{row.getValue("code")}</span>,
+      cell: ({ row }) => <span className="font-mono text-[13px] font-medium text-primary">{row.getValue("code")}</span>,
     },
     {
       accessorKey: "title",
@@ -68,9 +71,7 @@ export default function Page() {
       accessorKey: "type",
       header: "Type",
       cell: ({ row }) => (
-        <span className="inline-flex items-center rounded-full bg-accent text-accent-foreground border border-accent/50 px-2.5 py-0.5 text-xs font-medium">
-          {row.getValue("type")}
-        </span>
+        <StatusPill>{row.getValue("type")}</StatusPill>
       ),
     },
     {
@@ -78,13 +79,7 @@ export default function Page() {
       header: "Priority",
       cell: ({ row }) => {
         const priority = row.getValue("priority") as TicketPriority;
-        const styles: Record<TicketPriority, string> = {
-          [TicketPriority.Low]: "bg-slate-100 text-slate-600 border-slate-200",
-          [TicketPriority.Medium]: "bg-sky-100 text-sky-700 border-sky-200",
-          [TicketPriority.High]: "bg-amber-100 text-amber-700 border-amber-200",
-          [TicketPriority.Urgent]: "bg-rose-100 text-rose-700 border-rose-200",
-        };
-        return <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${styles[priority]}`}>{priority}</span>;
+        return <StatusPill tone={TICKET_PRIORITY_TONE[priority]}>{priority}</StatusPill>;
       },
     },
     {
@@ -92,21 +87,13 @@ export default function Page() {
       header: "Status",
       cell: ({ row }) => {
         const status = row.getValue("status") as TicketStatus;
-        const styles: Record<TicketStatus, string> = {
-          [TicketStatus.New]: "bg-slate-100 text-slate-600 border-slate-200",
-          [TicketStatus.Assigned]: "bg-blue-100 text-blue-700 border-blue-200",
-          [TicketStatus.Doing]: "bg-violet-100 text-violet-700 border-violet-200",
-          [TicketStatus.Waiting]: "bg-amber-100 text-amber-700 border-amber-200",
-          [TicketStatus.Done]: "bg-emerald-100 text-emerald-700 border-emerald-200",
-          [TicketStatus.Cancelled]: "bg-red-100 text-red-600 border-red-200",
-        };
-        return <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${styles[status]}`}>{status}</span>;
+        return <StatusPill dot tone={TICKET_STATUS_TONE[status]}>{status}</StatusPill>;
       },
     },
     {
       accessorKey: "createdAt",
       header: "Created At",
-      cell: ({ row }) => <span className="text-muted-foreground text-sm">{format(new Date(row.getValue("createdAt")), "MMM d, yyyy")}</span>,
+      cell: ({ row }) => <span className="text-muted-foreground text-[13px] tabular-nums">{format(new Date(row.getValue("createdAt")), "MMM d, yyyy")}</span>,
     },
     {
       id: "actions",
@@ -114,7 +101,7 @@ export default function Page() {
         const ticket = row.original as TicketModel;
         return (
           <DropdownMenu>
-            <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0" />}>
+            <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" className="rounded-full text-muted-foreground" />}>
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
@@ -122,17 +109,17 @@ export default function Page() {
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <Link href={`/tickets/${ticket._id}`}>
                 <DropdownMenuItem>
-                  <Eye className="mr-2 h-4 w-4" /> View Details
+                  <Eye className="h-4 w-4" /> View Details
                 </DropdownMenuItem>
               </Link>
               <Link href={`/tickets/${ticket._id}/edit`}>
                 <DropdownMenuItem>
-                  <Pencil className="mr-2 h-4 w-4" /> Edit
+                  <Pencil className="h-4 w-4" /> Edit
                 </DropdownMenuItem>
               </Link>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive focus:text-destructive">
-                <AlertTriangle className="mr-2 h-4 w-4" /> Cancel Ticket
+                <AlertTriangle className="h-4 w-4" /> Cancel Ticket
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -143,17 +130,17 @@ export default function Page() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Tickets</h1>
-          <p className="text-sm text-muted-foreground mt-1">Track and manage maintenance requests and repairs.</p>
-        </div>
-        <Link href="/tickets/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" /> Create Ticket
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        title="Tickets"
+        description="Track and manage maintenance requests and repairs."
+        actions={
+          <Link href="/tickets/new">
+            <Button>
+              <Plus className="h-4 w-4" /> Create Ticket
+            </Button>
+          </Link>
+        }
+      />
       <DataTable
         columns={columns}
         data={tickets}

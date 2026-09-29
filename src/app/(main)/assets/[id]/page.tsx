@@ -2,10 +2,10 @@
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useCallback } from "react";
 
-import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AssetInfoTab } from "@/components/assets/tabs/AssetInfoTab";
 import { AssetImagesTab } from "@/components/assets/tabs/AssetImagesTab";
@@ -44,21 +44,11 @@ export default function Page() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => router.push("/assets")}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          {isLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          ) : (
-            <>
-              <h1 className="text-2xl font-bold tracking-tight">{asset?.code}</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">{asset?.name}</p>
-            </>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        onBack={() => router.push("/assets")}
+        title={isLoading ? <Loader2 className="h-6 w-6 my-1 animate-spin text-muted-foreground" /> : asset?.code}
+        description={isLoading ? undefined : asset?.name}
+      />
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setTab}>
@@ -68,22 +58,22 @@ export default function Page() {
           <TabsTrigger value="images">
             Images
             {(asset?.imageUrls?.length ?? 0) > 0 && (
-              <span className="ml-1.5 rounded-full bg-primary/15 text-primary px-1.5 py-0.5 text-[10px] font-semibold">
+              <span className="ml-0.5 inline-flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-primary/12 text-primary px-1.5 text-[11px] font-semibold tabular-nums">
                 {asset?.imageUrls.length}
               </span>
             )}
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="items" className="mt-4">
+        <TabsContent value="items" className="mt-5">
           <AssetItemsTab assetId={id} />
         </TabsContent>
 
-        <TabsContent value="info" className="mt-4">
+        <TabsContent value="info" className="mt-5">
           {!isLoading && <AssetInfoTab asset={asset} />}
         </TabsContent>
 
-        <TabsContent value="images" className="mt-4">
+        <TabsContent value="images" className="mt-5">
           {asset && (
             <AssetImagesTab
               assetId={id}

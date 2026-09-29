@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { LocationForm } from "./LocationForm";
 import { LocationModel } from "@/types/location";
 import { FLOOR_OPTIONS } from "@/constants/data";
+import { StatusPill } from "@/components/ui/status-pill";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useLocations } from "./hook";
 
 const FLOOR_FILTER_OPTIONS = FLOOR_OPTIONS.map((f) => ({ label: f.label, value: String(f.value) }));
@@ -34,9 +36,9 @@ export function LocationList() {
     {
       accessorKey: "code",
       header: "Code",
-      cell: ({ row }) => <span className="font-mono font-semibold text-primary">{row.getValue("code")}</span>,
+      cell: ({ row }) => <span className="font-mono text-[13px] font-medium text-primary">{row.getValue("code")}</span>,
     },
-    { accessorKey: "name", header: "Name" },
+    { accessorKey: "name", header: "Name", cell: ({ row }) => <span className="font-medium">{row.getValue("name")}</span> },
     {
       accessorKey: "floor",
       header: "Floor",
@@ -51,19 +53,19 @@ export function LocationList() {
       accessorKey: "isActive",
       header: "Status",
       cell: ({ row }) => row.getValue("isActive")
-        ? <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-xs font-semibold">Active</span>
-        : <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-500 border border-slate-200 px-2.5 py-0.5 text-xs font-semibold">Inactive</span>,
+        ? <StatusPill dot tone="green">Active</StatusPill>
+        : <StatusPill dot tone="gray">Inactive</StatusPill>,
     },
     {
       id: "actions",
       cell: ({ row }) => {
         const loc = row.original;
         return (
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon-sm" onClick={() => openEdit(loc)}>
+          <div className="flex items-center justify-end gap-0.5">
+            <Button variant="ghost" size="icon-sm" className="rounded-full text-muted-foreground" onClick={() => openEdit(loc)}>
               <Pencil className="h-3.5 w-3.5" />
             </Button>
-            <Button variant="ghost" size="icon-sm" onClick={() => setDeleteTarget(loc)}>
+            <Button variant="ghost" size="icon-sm" className="rounded-full hover:bg-destructive/10" onClick={() => setDeleteTarget(loc)}>
               <Trash2 className="h-3.5 w-3.5 text-destructive" />
             </Button>
           </div>
@@ -74,15 +76,15 @@ export function LocationList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Locations</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage physical locations and floors.</p>
-        </div>
-        <Button onClick={openCreate}>
-          <Plus className="mr-2 h-4 w-4" /> Add Location
-        </Button>
-      </div>
+      <PageHeader
+        title="Locations"
+        description="Manage physical locations and floors."
+        actions={
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4" /> Add Location
+          </Button>
+        }
+      />
 
       <FilterBar hasFilters={hasFilters} onClear={clearFilters}>
         <DebouncedInput
@@ -144,7 +146,7 @@ export function LocationList() {
               disabled={deleteMutation.isPending}
               onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget._id)}
             >
-              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {deleteMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Delete
             </Button>
           </DialogFooter>

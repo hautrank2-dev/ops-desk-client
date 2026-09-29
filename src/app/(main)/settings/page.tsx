@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { LOCAL_KEYS } from "@/constants/local";
 import { httpClient } from "@/lib/httpClient";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 export default function Page() {
   const [apiUrl, setApiUrl] = useState("");
@@ -23,17 +24,14 @@ export default function Page() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">Configure your application settings.</p>
-      </div>
+    <div className="space-y-6 max-w-3xl">
+      <PageHeader title="Settings" description="Configure your application settings." />
       <Card>
         <CardHeader>
           <CardTitle>API Configuration</CardTitle>
           <CardDescription>Set the base URL for the OpsDesk API.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="api-url">API Base URL</Label>
             <Input
@@ -47,7 +45,7 @@ export default function Page() {
             </p>
           </div>
           <Button onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" /> Save Settings
+            <Save className="h-4 w-4" /> Save Settings
           </Button>
         </CardContent>
       </Card>

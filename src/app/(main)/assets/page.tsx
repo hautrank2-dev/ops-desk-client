@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { AssetModel, AssetType, TableResponse } from "@/types";
 import { httpClient } from "@/lib/httpClient";
+import { StatusPill } from "@/components/ui/status-pill";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const PAGE_SIZE = 10;
 
@@ -79,21 +81,19 @@ export default function Page() {
       header: "Code",
       cell: ({ row }) => (
         <span
-          className="font-mono font-semibold text-primary cursor-pointer hover:underline"
+          className="font-mono text-[13px] font-medium text-primary cursor-pointer hover:underline underline-offset-4"
           onClick={(e) => { e.stopPropagation(); router.push(`/assets/${row.original._id}?tab=items`); }}
         >
           {row.getValue("code")}
         </span>
       ),
     },
-    { accessorKey: "name", header: "Name" },
+    { accessorKey: "name", header: "Name", cell: ({ row }) => <span className="font-medium">{row.getValue("name")}</span> },
     {
       accessorKey: "type",
       header: "Type",
       cell: ({ row }) => (
-        <span className="inline-flex items-center rounded-full bg-accent text-accent-foreground border border-accent/50 px-2.5 py-0.5 text-xs font-medium">
-          {row.getValue("type")}
-        </span>
+        <StatusPill>{row.getValue("type")}</StatusPill>
       ),
     },
     { accessorKey: "vendor", header: "Vendor" },
@@ -102,8 +102,8 @@ export default function Page() {
       accessorKey: "active",
       header: "Status",
       cell: ({ row }) => row.getValue("active")
-        ? <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 text-xs font-semibold">Active</span>
-        : <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-500 border border-slate-200 px-2.5 py-0.5 text-xs font-semibold">Inactive</span>,
+        ? <StatusPill dot tone="green">Active</StatusPill>
+        : <StatusPill dot tone="gray">Inactive</StatusPill>,
     },
     {
       id: "itemCount",
@@ -113,13 +113,13 @@ export default function Page() {
         if (!ic) return <span className="text-muted-foreground text-xs">—</span>;
         return (
           <span
-            className="inline-flex items-center gap-1 font-mono text-xs"
+            className="inline-flex items-center gap-1 font-mono text-xs tabular-nums"
             title={`Available: ${ic.Active ?? 0} · Maintenance: ${ic.Maintenance ?? 0} · Retired: ${ic.Retired ?? 0}`}
           >
             <span className="font-semibold">{ic.total}</span>
-            {ic.Active > 0 && <span className="text-emerald-600">·{ic.Active}</span>}
-            {ic.Maintenance > 0 && <span className="text-amber-500">·{ic.Maintenance}</span>}
-            {ic.Retired > 0 && <span className="text-slate-400">·{ic.Retired}</span>}
+            {ic.Active > 0 && <span className="text-[#1a7f35] dark:text-[#5fe07e]">·{ic.Active}</span>}
+            {ic.Maintenance > 0 && <span className="text-[#c26a00] dark:text-[#ffb547]">·{ic.Maintenance}</span>}
+            {ic.Retired > 0 && <span className="text-muted-foreground/70">·{ic.Retired}</span>}
           </span>
         );
       },
@@ -135,7 +135,7 @@ export default function Page() {
         const asset = row.original;
         return (
           <DropdownMenu>
-            <DropdownMenuTrigger render={<Button variant="ghost" className="h-8 w-8 p-0" />}>
+            <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" className="rounded-full text-muted-foreground" />}>
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
@@ -159,16 +159,16 @@ export default function Page() {
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Assets</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage your organization's physical and digital assets.</p>
-        </div>
-        <Link href="/assets/new">
-          <Button><Plus className="mr-2 h-4 w-4" /> Add Asset</Button>
-        </Link>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Assets"
+        description="Manage your organization's physical and digital assets."
+        actions={
+          <Link href="/assets/new">
+            <Button><Plus className="h-4 w-4" /> Add Asset</Button>
+          </Link>
+        }
+      />
 
       <FilterBar hasFilters={hasFilters} onClear={() => { setFilters(EMPTY); setPage(1); }}>
         <DebouncedInput value={filters.code} onChange={set("code")} placeholder="Code…" className="w-32" />

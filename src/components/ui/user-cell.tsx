@@ -18,8 +18,8 @@ export function UserCell({ user }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-1.5">
-      <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
+    <div className="flex items-center gap-2">
+      <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e8e8ed] to-[#d2d2d7] text-[#48484a] text-[10px] font-semibold dark:from-[#3a3a3c] dark:to-[#2c2c2e] dark:text-[#d1d1d6]">
         {initials(user.name)}
       </span>
       <span className="text-sm truncate max-w-[120px]">{user.name}</span>

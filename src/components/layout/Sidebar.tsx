@@ -7,11 +7,10 @@ import {
   Settings, Menu, ChevronLeft, MapPin, Layers,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 export const SIDEBAR_EXPANDED_W = 240;
-export const SIDEBAR_COLLAPSED_W = 56;
+export const SIDEBAR_COLLAPSED_W = 64;
 
 type NavItem = {
   name: string;
@@ -36,6 +35,13 @@ const navItems: NavItem[] = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
+const navItemBase =
+  "flex items-center rounded-lg text-[13.5px] font-medium tracking-[-0.01em] transition-colors duration-150 cursor-pointer";
+const navItemIdle =
+  "text-foreground/70 hover:bg-black/[0.04] hover:text-foreground dark:hover:bg-white/[0.06]";
+const navItemActive =
+  "bg-black/[0.06] text-foreground dark:bg-white/[0.09]";
+
 type SidebarProps = {
   collapsed?: boolean;
   onToggle?: () => void;
@@ -50,46 +56,53 @@ export function Sidebar({ collapsed = false, onToggle, className }: SidebarProps
 
   return (
     <div
-      className={cn("flex flex-col border-r bg-card overflow-hidden transition-all duration-200", className)}
+      className={cn("flex flex-col border-r border-border bg-sidebar overflow-hidden transition-[width] duration-200 ease-apple", className)}
       style={{ width: collapsed ? SIDEBAR_COLLAPSED_W : SIDEBAR_EXPANDED_W }}
     >
       {/* Logo */}
-      <div className={cn("flex items-center h-14 border-b shrink-0 px-3", collapsed ? "justify-center" : "gap-2 px-4")}>
-        <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
-          <span className="text-primary-foreground text-xs font-bold">O</span>
+      <div className={cn("flex items-center h-14 shrink-0", collapsed ? "justify-center px-3" : "gap-2.5 px-5")}>
+        <div className="h-8 w-8 rounded-[9px] bg-gradient-to-b from-[#2997ff] to-[#0062d1] flex items-center justify-center shrink-0 shadow-[0_1px_2px_rgb(0_0_0/0.15),inset_0_1px_0_rgb(255_255_255/0.25)]">
+          <Layers className="h-4 w-4 text-white" strokeWidth={2.25} />
         </div>
-        {!collapsed && <span className="font-bold text-base tracking-tight truncate">OpsDesk</span>}
+        {!collapsed && (
+          <div className="min-w-0 leading-tight">
+            <p className="font-semibold text-[15px] tracking-[-0.02em] truncate">OpsDesk</p>
+            <p className="text-[11px] text-muted-foreground truncate">Asset & Maintenance</p>
+          </div>
+        )}
       </div>
 
       {/* Nav */}
-      <div className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+      <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
+        {!collapsed && (
+          <p className="px-2.5 pb-1.5 text-[11px] font-medium uppercase tracking-[0.06em] text-muted-foreground/70">Workspace</p>
+        )}
         {navItems.map((item) => {
           const active = isGroupActive(item);
 
           if (item.children && !collapsed) {
             return (
-              <div key={item.href}>
+              <div key={item.href} className="py-0.5">
                 {/* Parent row — not a link, just a label */}
                 <div className={cn(
-                  "flex items-center gap-3 w-full h-9 px-2.5 rounded-lg text-sm font-medium",
-                  active ? "text-foreground" : "text-muted-foreground"
+                  "flex items-center gap-2.5 w-full h-9 px-2.5 text-[13.5px] font-medium tracking-[-0.01em]",
+                  active ? "text-foreground" : "text-foreground/70"
                 )}>
-                  <item.icon className="h-4 w-4 shrink-0" />
+                  <item.icon className={cn("h-[17px] w-[17px] shrink-0", active ? "text-primary" : "text-foreground/50")} />
                   <span>{item.name}</span>
                 </div>
                 {/* Sub-items */}
-                <div className="ml-7 mt-0.5 space-y-0.5">
+                <div className="ml-[19px] mt-0.5 space-y-0.5 border-l border-border pl-2.5">
                   {item.children.map((child) => {
                     const childActive = pathname === child.href ||
                       (child.href !== item.href && pathname.startsWith(child.href));
                     return (
-                      <Link key={child.href} href={child.href} className="block">
-                        <Button
-                          variant={childActive ? "default" : "ghost"}
-                          className="w-full h-8 justify-start text-xs px-2.5"
-                        >
-                          {child.name}
-                        </Button>
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        className={cn(navItemBase, "h-8 px-2.5 text-[13px]", childActive ? navItemActive : navItemIdle)}
+                      >
+                        {child.name}
                       </Link>
                     );
                   })}
@@ -98,35 +111,38 @@ export function Sidebar({ collapsed = false, onToggle, className }: SidebarProps
             );
           }
 
-          // collapsed or no children — single icon button
+          // collapsed or no children — single icon link
           return (
-            <Link key={item.href} href={item.href} className="block cursor-pointer" title={collapsed ? item.name : undefined}>
-              <Button
-                variant={active ? "default" : "ghost"}
-                className={cn(
-                  "w-full h-9 cursor-pointer transition-all",
-                  collapsed ? "justify-center px-0" : "justify-start gap-3",
-                  active && "shadow-sm"
-                )}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {!collapsed && <span>{item.name}</span>}
-              </Button>
+            <Link
+              key={item.href}
+              href={item.href}
+              title={collapsed ? item.name : undefined}
+              className={cn(
+                navItemBase,
+                "h-9",
+                collapsed ? "justify-center px-0" : "gap-2.5 px-2.5",
+                active ? navItemActive : navItemIdle
+              )}
+            >
+              <item.icon className={cn("h-[17px] w-[17px] shrink-0", active ? "text-primary" : "text-foreground/50")} />
+              {!collapsed && <span>{item.name}</span>}
             </Link>
           );
         })}
-      </div>
+      </nav>
 
-      {/* Collapse toggle */}
-      <div className={cn("border-t p-2", collapsed ? "flex justify-center" : "flex justify-end")}>
-        <button
-          onClick={onToggle}
-          className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          <ChevronLeft className={cn("h-4 w-4 transition-transform duration-200", collapsed && "rotate-180")} />
-        </button>
-      </div>
+      {/* Collapse toggle — desktop only */}
+      {onToggle && (
+        <div className={cn("p-3", collapsed ? "flex justify-center" : "flex justify-end")}>
+          <button
+            onClick={onToggle}
+            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            <ChevronLeft className={cn("h-4 w-4 transition-transform duration-200 ease-apple", collapsed && "rotate-180")} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -136,12 +152,12 @@ export function MobileSidebar() {
     <Sheet>
       <SheetTrigger
         render={
-          <button className="inline-flex cursor-pointer items-center justify-center rounded-lg h-8 w-8 text-sm font-medium transition-all hover:bg-muted hover:text-foreground md:hidden" />
+          <button className="inline-flex cursor-pointer items-center justify-center rounded-full h-9 w-9 -ml-1.5 text-foreground/70 transition-colors hover:bg-black/[0.05] hover:text-foreground dark:hover:bg-white/[0.08] md:hidden" />
         }
       >
         <Menu className="h-5 w-5" />
       </SheetTrigger>
-      <SheetContent side="left" className="p-0 w-60">
+      <SheetContent side="left" className="p-0 w-60 gap-0">
         <Sidebar className="h-full border-none" />
       </SheetContent>
     </Sheet>

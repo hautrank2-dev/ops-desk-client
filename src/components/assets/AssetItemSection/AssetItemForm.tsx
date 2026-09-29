@@ -113,7 +113,7 @@ export function AssetItemForm({ createMutation, onCancel }: Props) {
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
         <Button type="submit" disabled={createMutation.isPending}>
-          {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {createMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
           Add Items
         </Button>
       </DialogFooter>
