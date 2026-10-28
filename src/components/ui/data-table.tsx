@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ChevronDown, Search, ChevronLeft, ChevronRight, Inbox, SlidersHorizontal } from "lucide-react"
+import { ChevronDown, ChevronLeft, ChevronRight, Inbox, SlidersHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
@@ -22,7 +22,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -35,15 +34,14 @@ import {
 type DataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-  searchKey?: string
-  searchPlaceholder?: string
+  // header: filter controls (left) + extra (column select, right)
+  filter?: React.ReactNode
   // server-side pagination
   page?: number
   pageSize?: number
   total?: number
   totalPage?: number
   onPageChange?: (page: number) => void
-  onSearch?: (value: string) => void
   onRowClick?: (row: TData) => void
   // row selection
   enableRowSelection?: boolean
@@ -54,13 +52,11 @@ type DataTableProps<TData, TValue> = {
 export function DataTable<TData, TValue>({
   columns,
   data,
-  searchKey,
-  searchPlaceholder = "Filter...",
+  filter,
   page,
   totalPage,
   total,
   onPageChange,
-  onSearch,
   onRowClick,
   enableRowSelection,
   onSelectionChange,
@@ -71,7 +67,6 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
-  const [searchValue, setSearchValue] = React.useState("")
 
   // prepend checkbox column when selection is enabled
   const allColumns = React.useMemo<ColumnDef<TData, TValue>[]>(() => {
@@ -128,15 +123,6 @@ export function DataTable<TData, TValue>({
   const currentPage = page ?? 1
   const pages = totalPage ?? 1
 
-  const handleSearch = (value: string) => {
-    setSearchValue(value)
-    if (onSearch) {
-      onSearch(value)
-    } else if (searchKey) {
-      table.getColumn(searchKey)?.setFilterValue(value)
-    }
-  }
-
   const getPageNumbers = () => {
     if (pages <= 7) return Array.from({ length: pages }, (_, i) => i + 1)
     const delta = 2
@@ -153,22 +139,12 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex items-center gap-3">
-        {(searchKey || onSearch) && (
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            <Input
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-        )}
+      <div className="flex items-end gap-3">
+        <div className="min-w-0 flex-1">{filter}</div>
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <button className="ml-auto inline-flex cursor-pointer items-center gap-1.5 rounded-[10px] border border-input bg-card px-3 h-9 text-sm font-medium text-foreground/80 shadow-[0_1px_2px_rgb(0_0_0/0.04)] transition-colors hover:bg-muted hover:text-foreground aria-expanded:bg-muted dark:bg-white/[0.04] dark:hover:bg-white/[0.08]" />
+              <button className="shrink-0 inline-flex cursor-pointer items-center gap-1.5 rounded-[10px] border border-input bg-card px-3 h-9 text-sm font-medium text-foreground/80 shadow-[0_1px_2px_rgb(0_0_0/0.04)] transition-colors hover:bg-muted hover:text-foreground aria-expanded:bg-muted dark:bg-white/[0.04] dark:hover:bg-white/[0.08]" />
             }
           >
             <SlidersHorizontal className="h-3.5 w-3.5" /> Columns <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />

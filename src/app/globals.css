@@ -58,6 +58,7 @@
   --radius-3xl: 1.5rem;
 
   --ease-apple: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --spacing: 0.25rem;
 }
 
 .dark {

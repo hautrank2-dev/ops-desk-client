@@ -14,10 +14,9 @@ import { fileUrl } from "@/lib/fileUrl";
 import { formatDate, formatDateFull } from "@/lib/formatDate";
 import { UserCell } from "@/components/ui/user-cell";
 import { StatusPill } from "@/components/ui/status-pill";
+import { ImageGroup, Image } from "@/components/ui/image";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TICKET_PRIORITY_TONE, TICKET_STATUS_TONE } from "@/constants/tones";
-import { useState } from "react";
-import { X } from "lucide-react";
 
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
@@ -31,7 +30,6 @@ function InfoRow({ label, children }: { label: string; children: React.ReactNode
 
 export function TicketDetail({ id }: { id: string }) {
   const router = useRouter();
-  const [previewing, setPreviewing] = useState<string | null>(null);
 
   const { data: ticket, isLoading } = useQuery<TicketModel>({
     queryKey: ["ticket", id],
@@ -140,20 +138,18 @@ export function TicketDetail({ id }: { id: string }) {
             <Card>
               <CardHeader><CardTitle>Images <span className="text-muted-foreground font-normal text-xs ml-1">({imageUrls.length})</span></CardTitle></CardHeader>
               <CardContent>
+                <ImageGroup>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                   {imageUrls.map((path, i) => {
                     const url = fileUrl(path);
                     return (
-                      <div
-                        key={i}
-                        className="group aspect-square rounded-xl overflow-hidden bg-muted shadow-soft cursor-zoom-in"
-                        onClick={() => setPreviewing(url)}
-                      >
-                        <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover transition-transform duration-300 ease-apple group-hover:scale-[1.03]" />
+                      <div key={i} className="group aspect-square rounded-xl overflow-hidden bg-muted shadow-soft">
+                        <Image src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover transition-transform duration-300 ease-apple group-hover:scale-[1.03]" />
                       </div>
                     );
                   })}
                 </div>
+                </ImageGroup>
               </CardContent>
             </Card>
           )}
@@ -214,28 +210,6 @@ export function TicketDetail({ id }: { id: string }) {
         </div>
       </div>
 
-      {/* Lightbox */}
-      {previewing && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md"
-          onClick={() => setPreviewing(null)}
-        >
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 right-4 rounded-full bg-white/10 text-white hover:bg-white/20 hover:text-white"
-            onClick={() => setPreviewing(null)}
-          >
-            <X className="h-5 w-5" />
-          </Button>
-          <img
-            src={previewing}
-            alt="Preview"
-            className="max-w-[90vw] max-h-[90vh] rounded-2xl object-contain shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
     </div>
   );
 }

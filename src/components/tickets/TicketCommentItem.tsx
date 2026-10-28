@@ -10,6 +10,7 @@ import { Loader2, Edit2, Trash, Save, ImageIcon } from "lucide-react";
 
 import { httpClient } from "@/lib/httpClient";
 import { fileUrl } from "@/lib/fileUrl";
+import { ImageGroup, Image } from "@/components/ui/image";
 import { TicketCommentModel } from "@/types/ticket-comment";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -134,21 +135,23 @@ export function TicketCommentItem({
               {keptImages.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-muted-foreground">Current Images:</p>
+                  <ImageGroup>
                   <div className="flex flex-wrap gap-2">
                     {keptImages.map((img, idx) => (
                       <div key={idx} className="relative h-16 w-16 rounded-lg overflow-hidden shadow-soft group">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={fileUrl(img)} alt={`kept-${idx}`} className="object-cover w-full h-full" />
+                        <Image src={fileUrl(img)} alt={`Image ${idx + 1}`} className="object-cover w-full h-full" />
                         <button
                           type="button"
+                          aria-label="Remove image"
                           onClick={() => handleRemoveKeptImage(img)}
-                          className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer"
+                          className="absolute right-1 top-1 flex size-5 cursor-pointer items-center justify-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
                         >
-                          <Trash className="h-4 w-4 text-white" />
+                          <Trash className="size-3" />
                         </button>
                       </div>
                     ))}
                   </div>
+                  </ImageGroup>
                 </div>
               )}
 
@@ -241,18 +244,19 @@ export function TicketCommentItem({
         <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">{comment.content}</p>
 
         {comment.imgUrls && comment.imgUrls.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {comment.imgUrls.map((img, idx) => (
-              <div key={idx} className="relative h-20 w-20 rounded-xl overflow-hidden shadow-soft">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={fileUrl(img)}
-                  alt={`Comment attachment ${idx + 1}`}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            ))}
-          </div>
+          <ImageGroup>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {comment.imgUrls.map((img, idx) => (
+                <div key={idx} className="relative h-20 w-20 rounded-xl overflow-hidden shadow-soft">
+                  <Image
+                    src={fileUrl(img)}
+                    alt={`Comment attachment ${idx + 1}`}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+              ))}
+            </div>
+          </ImageGroup>
         )}
       </div>
     </div>

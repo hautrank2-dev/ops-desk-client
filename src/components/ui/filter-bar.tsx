@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Search, X } from "lucide-react";
+import { ListFilter, Search, X } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,7 +10,7 @@ import { Select as SelectPrimitive } from "@base-ui/react/select";
 import { ChevronDownIcon, CheckIcon } from "lucide-react";
 
 // ── Label wrapper ─────────────────────────────────────────────────────────────
-function FilterLabel({ label, children }: { label?: string; children: React.ReactNode }) {
+export function FilterLabel({ label, children }: { label?: string; children: React.ReactNode }) {
   if (!label) return <>{children}</>;
   return (
     <div className="flex flex-col gap-1.5">
@@ -161,5 +162,59 @@ export function FilterBar({ children, onClear, hasFilters }: FilterBarProps) {
         </Button>
       )}
     </div>
+  );
+}
+
+// ── Date range (two native date inputs) ───────────────────────────────────────
+type DateRangeFilterProps = {
+  label?: string;
+  start: string;
+  end: string;
+  onChange: (range: { start: string; end: string }) => void;
+};
+
+export function DateRangeFilter({ label, start, end, onChange }: DateRangeFilterProps) {
+  return (
+    <FilterLabel label={label}>
+      <div className="flex items-center gap-1.5">
+        <Input type="date" value={start} max={end || undefined} onChange={(e) => onChange({ start: e.target.value, end })} className="h-9 text-sm" />
+        <span className="text-muted-foreground text-xs">→</span>
+        <Input type="date" value={end} min={start || undefined} onChange={(e) => onChange({ start, end: e.target.value })} className="h-9 text-sm" />
+      </div>
+    </FilterLabel>
+  );
+}
+
+// ── Grouped filters in one popover ────────────────────────────────────────────
+type FilterPopoverProps = {
+  children: React.ReactNode;
+  activeCount: number;
+  onClear?: () => void;
+};
+
+export function FilterPopover({ children, activeCount, onClear }: FilterPopoverProps) {
+  return (
+    <Popover>
+      <PopoverTrigger
+        render={
+          <button className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-[10px] border border-input bg-card px-3 text-sm font-medium text-foreground/80 shadow-[0_1px_2px_rgb(0_0_0/0.04)] transition-colors hover:bg-muted hover:text-foreground aria-expanded:bg-muted dark:bg-white/[0.04] dark:hover:bg-white/[0.08]" />
+        }
+      >
+        <ListFilter className="h-3.5 w-3.5" /> Filters
+        {activeCount > 0 && (
+          <span className="inline-flex min-w-[18px] h-[18px] items-center justify-center rounded-full bg-primary/12 text-primary px-1.5 text-[11px] font-semibold tabular-nums">
+            {activeCount}
+          </span>
+        )}
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-[360px] gap-3">
+        <div className="grid gap-3">{children}</div>
+        {onClear && activeCount > 0 && (
+          <Button variant="ghost" size="sm" className="self-end text-[13px] text-muted-foreground" onClick={onClear}>
+            <X className="h-3 w-3 mr-1" /> Clear filters
+          </Button>
+        )}
+      </PopoverContent>
+    </Popover>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ImageGroup, Image } from "@/components/ui/image";
 
 type ImageUploadProps = {
   value?: File[];
@@ -15,7 +16,9 @@ export function ImageUpload({ value = [], onChange, maxFiles = 10, className }: 
   const inputRef = useRef<HTMLInputElement>(null);
   const [previews, setPreviews] = useState<{ file: File; url: string }[]>([]);
 
-  const handleFiles = (incoming: FileList | null) => {
+  const [dragging, setDragging] = useState(false);
+
+  const handleFiles = (incoming: FileList | File[] | null) => {
     if (!incoming) return;
     const newFiles = Array.from(incoming).filter((f) => f.type.startsWith("image/"));
     const combined = [...value, ...newFiles].slice(0, maxFiles);
@@ -33,22 +36,41 @@ export function ImageUpload({ value = [], onChange, maxFiles = 10, className }: 
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    setDragging(false);
     handleFiles(e.dataTransfer.files);
   };
+
+  // Ctrl/Cmd+V anywhere while mounted (e.g. inside the upload dialog) adds clipboard images.
+  const handleFilesRef = useRef(handleFiles);
+  handleFilesRef.current = handleFiles;
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const files = Array.from(e.clipboardData?.files ?? []).filter((f) => f.type.startsWith("image/"));
+      if (files.length === 0) return;
+      e.preventDefault();
+      handleFilesRef.current(files);
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, []);
 
   return (
     <div className={cn("space-y-3", className)}>
       <div
         onClick={() => inputRef.current?.click()}
         onDrop={onDrop}
-        onDragOver={(e) => e.preventDefault()}
-        className="group/drop flex flex-col items-center justify-center gap-3 rounded-2xl border-[1.5px] border-dashed border-black/15 bg-muted/40 px-6 py-8 cursor-pointer transition-colors duration-200 hover:border-primary/50 hover:bg-primary/[0.03] dark:border-white/15"
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        className={cn(
+          "group/drop flex flex-col items-center justify-center gap-3 rounded-2xl border-[1.5px] border-dashed border-black/15 bg-muted/40 px-6 py-8 cursor-pointer transition-colors duration-200 hover:border-primary/50 hover:bg-primary/[0.03] dark:border-white/15",
+          dragging && "border-primary bg-primary/[0.06] dark:border-primary"
+        )}
       >
         <span className="flex h-11 w-11 items-center justify-center rounded-full bg-card shadow-soft transition-transform duration-200 group-hover/drop:scale-105">
           <ImagePlus className="h-5 w-5 text-primary" />
         </span>
         <div className="text-center">
-          <p className="text-sm font-medium">Click or drag images here</p>
+          <p className="text-sm font-medium">{dragging ? "Drop to add" : "Click, drag or paste images here"}</p>
           <p className="text-xs text-muted-foreground mt-0.5">PNG, JPG, WEBP — up to {maxFiles} files</p>
         </div>
         <input
@@ -62,10 +84,11 @@ export function ImageUpload({ value = [], onChange, maxFiles = 10, className }: 
       </div>
 
       {previews.length > 0 && (
+        <ImageGroup>
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
           {previews.map((p, i) => (
             <div key={i} className="relative group aspect-square rounded-xl overflow-hidden bg-muted shadow-soft">
-              <img src={p.url} alt="" className="w-full h-full object-cover" />
+              <Image src={p.url} alt={p.file.name} className="w-full h-full object-cover" />
               <button
                 type="button"
                 onClick={() => remove(i)}
@@ -76,6 +99,7 @@ export function ImageUpload({ value = [], onChange, maxFiles = 10, className }: 
             </div>
           ))}
         </div>
+        </ImageGroup>
       )}
     </div>
   );

@@ -35,7 +35,7 @@ export type TicketModel = {
   cause?: string;
   note?: string;
   locationId?: string;
-  assigneeId?: string;
+  assigneeId?: string | UserModel | null;
   teamId?: string;
   dueAt?: string;
   closedAt?: string;

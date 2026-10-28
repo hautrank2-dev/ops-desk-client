@@ -9,6 +9,9 @@ import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
+import { DateRangeFilter, DebouncedInput, FilterBar, FilterLabel, FilterPopover, FilterSelect } from "@/components/ui/filter-bar";
+import { UserCell } from "@/components/ui/user-cell";
+import { UserSelect } from "@/components/selects/UserSelect";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,36 +28,100 @@ import { TICKET_PRIORITY_TONE, TICKET_STATUS_TONE } from "@/constants/tones";
 
 const PAGE_SIZE = 10;
 
+const toOptions = (values: string[]) => values.map((v) => ({ label: v, value: v }));
+
+type TicketFilters = {
+  code: string;
+  title: string;
+  status: string;
+  priority: string;
+  type: string;
+  assigneeId: string;
+  createdStart: string;
+  createdEnd: string;
+  dueStart: string;
+  dueEnd: string;
+  sortBy: string;
+  order: "asc" | "desc";
+};
+
+const EMPTY_FILTERS: TicketFilters = {
+  code: "", title: "", status: "", priority: "", type: "", assigneeId: "",
+  createdStart: "", createdEnd: "", dueStart: "", dueEnd: "",
+  sortBy: "createdAt", order: "desc",
+};
+
+// Popover keys count toward the "Filters" badge; code/title stay inline.
+const POPOVER_KEYS: (keyof TicketFilters)[] = [
+  "status", "priority", "type", "assigneeId", "createdStart", "createdEnd", "dueStart", "dueEnd",
+];
+
+const SORT_OPTIONS = [
+  { label: "Newest", value: "createdAt:desc" },
+  { label: "Oldest", value: "createdAt:asc" },
+  { label: "Priority: high → low", value: "priority:desc" },
+  { label: "Priority: low → high", value: "priority:asc" },
+  { label: "Status: new → closed", value: "status:asc" },
+  { label: "Status: closed → new", value: "status:desc" },
+  { label: "Due date: soonest", value: "dueAt:asc" },
+  { label: "Due date: latest", value: "dueAt:desc" },
+];
+
+// Date inputs give yyyy-MM-dd; send full-day ISO bounds.
+const dayStart = (d: string) => (d ? new Date(`${d}T00:00:00`).toISOString() : undefined);
+const dayEnd = (d: string) => (d ? new Date(`${d}T23:59:59.999`).toISOString() : undefined);
+
 export default function Page() {
   const router = useRouter();
   const [tickets, setTickets] = useState<TicketModel[]>([]);
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState<TicketFilters>(EMPTY_FILTERS);
+
+  const setFilter = (patch: Partial<TicketFilters>) => {
+    setFilters((f) => ({ ...f, ...patch }));
+    setPage(1);
+  };
+
+  const popoverCount = POPOVER_KEYS.filter((k) => filters[k]).length;
+  const hasFilters = popoverCount > 0 || !!filters.code || !!filters.title;
 
   useEffect(() => {
     const fetchTickets = async () => {
       try {
+        const f = filters;
         const { data } = await httpClient.get<TableResponse<TicketModel>>('/ticket', {
-          params: { page, pageSize: PAGE_SIZE, search: search || undefined },
+          params: {
+            page,
+            pageSize: PAGE_SIZE,
+            populations: ["assigneeId"],
+            code: f.code || undefined,
+            title: f.title || undefined,
+            status: f.status || undefined,
+            priority: f.priority || undefined,
+            type: f.type || undefined,
+            assigneeId: f.assigneeId || undefined,
+            startCreatedAt: dayStart(f.createdStart),
+            endCreatedAt: dayEnd(f.createdEnd),
+            startDueAt: dayStart(f.dueStart),
+            endDueAt: dayEnd(f.dueEnd),
+            sortBy: f.sortBy,
+            order: f.order,
+          },
         });
         setTickets(data.items || []);
         setTotalPage(data.totalPage ?? data.totalPages ?? 1);
         setTotal(data.total ?? 0);
       } catch (error) {
         console.error("Failed to fetch tickets", error);
-        setTickets([
-          { _id: "1", code: "TKT-001", title: "AC leaking in Room 302", type: TicketType.Repair, priority: TicketPriority.High, status: TicketStatus.Doing, assetItemIds: ["1"], images: [], imageUrls: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { _id: "2", code: "TKT-002", title: "Annual Server Maintenance", type: TicketType.Maintenance, priority: TicketPriority.Medium, status: TicketStatus.New, assetItemIds: ["2"], images: [], imageUrls: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { _id: "3", code: "TKT-003", title: "Broken window in lobby", type: TicketType.Incident, priority: TicketPriority.Urgent, status: TicketStatus.Waiting, assetItemIds: ["3"], images: [], imageUrls: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        ]);
+        setTickets([]);
         setTotalPage(1);
-        setTotal(3);
+        setTotal(0);
       }
     };
     fetchTickets();
-  }, [page, search]);
+  }, [page, filters]);
 
   const columns: ColumnDef<TicketModel>[] = [
     {
@@ -88,6 +155,19 @@ export default function Page() {
       cell: ({ row }) => {
         const status = row.getValue("status") as TicketStatus;
         return <StatusPill dot tone={TICKET_STATUS_TONE[status]}>{status}</StatusPill>;
+      },
+    },
+    {
+      id: "assignee",
+      header: "Assignee",
+      cell: ({ row }) => <UserCell user={row.original.assigneeId} />,
+    },
+    {
+      accessorKey: "dueAt",
+      header: "Due",
+      cell: ({ row }) => {
+        const dueAt = row.original.dueAt;
+        return <span className="text-muted-foreground text-[13px] tabular-nums">{dueAt ? format(new Date(dueAt), "MMM d, yyyy") : "—"}</span>;
       },
     },
     {
@@ -144,8 +224,32 @@ export default function Page() {
       <DataTable
         columns={columns}
         data={tickets}
-        searchPlaceholder="Search tickets..."
-        onSearch={(v) => { setSearch(v); setPage(1); }}
+        filter={
+          <FilterBar hasFilters={hasFilters} onClear={() => setFilter({ ...EMPTY_FILTERS, sortBy: filters.sortBy, order: filters.order })}>
+            <DebouncedInput value={filters.code} onChange={(v) => setFilter({ code: v })} placeholder="Code" className="w-36" icon />
+            <DebouncedInput value={filters.title} onChange={(v) => setFilter({ title: v })} placeholder="Search title..." className="w-56" icon />
+            <FilterPopover activeCount={popoverCount} onClear={() => setFilter(Object.fromEntries(POPOVER_KEYS.map((k) => [k, ""])))}>
+              <div className="grid grid-cols-2 gap-3">
+                <FilterSelect label="Status" value={filters.status} onChange={(v) => setFilter({ status: v })} placeholder="All" options={toOptions(Object.values(TicketStatus))} />
+                <FilterSelect label="Priority" value={filters.priority} onChange={(v) => setFilter({ priority: v })} placeholder="All" options={toOptions(Object.values(TicketPriority))} />
+                <FilterSelect label="Type" value={filters.type} onChange={(v) => setFilter({ type: v })} placeholder="All" options={toOptions(Object.values(TicketType))} />
+                <FilterLabel label="Assignee"><UserSelect value={filters.assigneeId} onChange={(v) => setFilter({ assigneeId: v })} placeholder="Anyone" status="all" /></FilterLabel>
+              </div>
+              <DateRangeFilter label="Created" start={filters.createdStart} end={filters.createdEnd} onChange={({ start, end }) => setFilter({ createdStart: start, createdEnd: end })} />
+              <DateRangeFilter label="Due date" start={filters.dueStart} end={filters.dueEnd} onChange={({ start, end }) => setFilter({ dueStart: start, dueEnd: end })} />
+            </FilterPopover>
+            <FilterSelect
+              value={`${filters.sortBy}:${filters.order}`}
+              onChange={(v) => {
+                const [sortBy, order] = (v || "createdAt:desc").split(":");
+                setFilter({ sortBy, order: order as "asc" | "desc" });
+              }}
+              placeholder="Sort"
+              options={SORT_OPTIONS}
+              className="w-52"
+            />
+          </FilterBar>
+        }
         page={page}
         totalPage={totalPage}
         total={total}

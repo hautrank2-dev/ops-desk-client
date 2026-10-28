@@ -1,34 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Send, ImageIcon, Edit2, Trash, X } from "lucide-react";
+import { Loader2, Send, ImageIcon, X } from "lucide-react";
 
 import { httpClient } from "@/lib/httpClient";
-import { fileUrl } from "@/lib/fileUrl";
+import { cn } from "@/lib/utils";
 import { TicketCommentModel } from "@/types/ticket-comment";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { ImageUpload } from "@/components/ui/image-upload";
+import { ImageGroup, Image } from "@/components/ui/image";
 import { TicketCommentItem } from "./TicketCommentItem";
 
+const MAX_IMAGES = 5;
 
 const commentSchema = z.object({
   content: z.string().min(1, "Comment cannot be empty"),
-  images: z.array(z.instanceof(File)).max(5, "Maximum 5 images allowed").optional(),
+  images: z.array(z.instanceof(File)).max(MAX_IMAGES, `Maximum ${MAX_IMAGES} images allowed`).optional(),
 });
 
 type CommentFormValues = z.infer<typeof commentSchema>;
 
+/** Object URLs for local previews, revoked when the files change or on unmount. */
+function useObjectUrls(files: File[]) {
+  const [urls, setUrls] = useState<string[]>([]);
+  useEffect(() => {
+    const next = files.map((f) => URL.createObjectURL(f));
+    setUrls(next);
+    return () => next.forEach((u) => URL.revokeObjectURL(u));
+  }, [files]);
+  return urls;
+}
+
 export function TicketComment({ ticketId }: { ticketId: string }) {
   const queryClient = useQueryClient();
-  const [showImageUpload, setShowImageUpload] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const { data: comments = [], isLoading } = useQuery<TicketCommentModel[]>({
@@ -42,11 +54,22 @@ export function TicketComment({ ticketId }: { ticketId: string }) {
 
   const form = useForm<CommentFormValues>({
     resolver: zodResolver(commentSchema),
-    defaultValues: {
-      content: "",
-      images: [],
-    },
+    defaultValues: { content: "", images: [] },
   });
+
+  const images = form.watch("images") ?? [];
+  const previews = useObjectUrls(images);
+
+  /** Returns true when at least one image was attached (so paste can be swallowed). */
+  const addImages = (incoming: FileList | File[] | null | undefined) => {
+    const files = Array.from(incoming ?? []).filter((f) => f.type.startsWith("image/"));
+    if (files.length === 0) return false;
+    form.setValue("images", [...images, ...files].slice(0, MAX_IMAGES), { shouldValidate: true });
+    return true;
+  };
+
+  const removeImage = (index: number) =>
+    form.setValue("images", images.filter((_, i) => i !== index), { shouldValidate: true });
 
   const createMutation = useMutation({
     mutationFn: async (values: CommentFormValues) => {
@@ -63,7 +86,6 @@ export function TicketComment({ ticketId }: { ticketId: string }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["ticket-comments", ticketId] });
       form.reset({ content: "", images: [] });
-      setShowImageUpload(false);
     },
   });
 
@@ -85,52 +107,71 @@ export function TicketComment({ ticketId }: { ticketId: string }) {
               name="content"
               render={({ field }) => (
                 <FormItem>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Add a comment or update..."
-                      className="min-h-[88px]"
-                      {...field}
-                    />
-                  </FormControl>
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                    onDragLeave={(e) => {
+                      if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false);
+                    }}
+                    onDrop={(e) => { e.preventDefault(); setDragging(false); addImages(e.dataTransfer.files); }}
+                    className={cn(
+                      "rounded-xl border border-input bg-card transition-colors dark:bg-white/[0.04]",
+                      dragging && "border-primary bg-primary/[0.04] ring-4 ring-ring/15"
+                    )}
+                  >
+                    <FormControl>
+                      <Textarea
+                        placeholder={dragging ? "Drop images to attach" : "Add a comment… (paste or drop images to attach)"}
+                        className="min-h-[88px] border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
+                        onPaste={(e) => { if (addImages(e.clipboardData.files)) e.preventDefault(); }}
+                        {...field}
+                      />
+                    </FormControl>
+
+                    {previews.length > 0 && (
+                      <ImageGroup>
+                      <div className="flex flex-wrap gap-2 px-3 pb-3">
+                        {previews.map((url, i) => (
+                          <div key={url} className="group relative size-16 overflow-hidden rounded-lg bg-muted shadow-soft">
+                            <Image src={url} alt={`Attachment ${i + 1}`} className="size-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(i)}
+                              aria-label="Remove image"
+                              className="absolute right-1 top-1 flex size-5 cursor-pointer items-center justify-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100"
+                            >
+                              <X className="size-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      </ImageGroup>
+                    )}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <FormField control={form.control} name="images" render={() => <FormItem><FormMessage /></FormItem>} />
 
-            {showImageUpload && (
-              <FormField
-                control={form.control}
-                name="images"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-[13px] font-medium">Attach Images (Max 5)</span>
-                      <Button type="button" variant="ghost" size="icon-sm" className="rounded-full text-muted-foreground" onClick={() => {
-                        setShowImageUpload(false);
-                        form.setValue("images", []);
-                      }}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <FormControl>
-                      <ImageUpload value={field.value ?? []} onChange={field.onChange} maxFiles={5} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+            <input
+              ref={fileInput}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => { addImages(e.target.files); e.target.value = ""; }}
+            />
 
             <div className="flex items-center justify-between">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setShowImageUpload(true)}
-                disabled={showImageUpload}
+                onClick={() => fileInput.current?.click()}
+                disabled={images.length >= MAX_IMAGES}
               >
                 <ImageIcon className="h-4 w-4" />
-                Add Images
+                Add Images{images.length > 0 ? ` (${images.length}/${MAX_IMAGES})` : ""}
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
                 {createMutation.isPending ? (
@@ -156,10 +197,10 @@ export function TicketComment({ ticketId }: { ticketId: string }) {
             </p>
           ) : (
             comments.map((comment) => (
-              <TicketCommentItem 
-                key={comment._id} 
-                comment={comment} 
-                ticketId={ticketId} 
+              <TicketCommentItem
+                key={comment._id}
+                comment={comment}
+                ticketId={ticketId}
                 isEditing={editingId === comment._id}
                 onEditStart={() => setEditingId(comment._id)}
                 onEditCancel={() => setEditingId(null)}

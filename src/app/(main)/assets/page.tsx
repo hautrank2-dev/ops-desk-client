@@ -170,16 +170,17 @@ export default function Page() {
         }
       />
 
-      <FilterBar hasFilters={hasFilters} onClear={() => { setFilters(EMPTY); setPage(1); }}>
-        <DebouncedInput value={filters.code} onChange={set("code")} placeholder="Code…" className="w-32" />
-        <DebouncedInput value={filters.name} onChange={set("name")} placeholder="Name…" className="w-44" />
-        <FilterSelect value={filters.type} onChange={set("type")} placeholder="All types" options={TYPE_OPTIONS} className="w-36" />
-        <DebouncedInput value={filters.vendor} onChange={set("vendor")} placeholder="Vendor…" className="w-36" />
-        <DebouncedInput value={filters.model} onChange={set("model")} placeholder="Model…" className="w-36" />
-        <FilterSelect value={filters.active} onChange={set("active")} placeholder="All status" options={ACTIVE_OPTIONS} className="w-32" />
-      </FilterBar>
-
       <DataTable
+        filter={
+          <FilterBar hasFilters={hasFilters} onClear={() => { setFilters(EMPTY); setPage(1); }}>
+            <DebouncedInput value={filters.code} onChange={set("code")} placeholder="Code…" className="w-32" />
+            <DebouncedInput value={filters.name} onChange={set("name")} placeholder="Name…" className="w-44" />
+            <FilterSelect value={filters.type} onChange={set("type")} placeholder="All types" options={TYPE_OPTIONS} className="w-36" />
+            <DebouncedInput value={filters.vendor} onChange={set("vendor")} placeholder="Vendor…" className="w-36" />
+            <DebouncedInput value={filters.model} onChange={set("model")} placeholder="Model…" className="w-36" />
+            <FilterSelect value={filters.active} onChange={set("active")} placeholder="All status" options={ACTIVE_OPTIONS} className="w-32" />
+          </FilterBar>
+        }
         columns={columns}
         data={assets}
         page={page}

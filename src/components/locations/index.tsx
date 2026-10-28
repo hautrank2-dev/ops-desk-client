@@ -86,34 +86,35 @@ export function LocationList() {
         }
       />
 
-      <FilterBar hasFilters={hasFilters} onClear={clearFilters}>
-        <DebouncedInput
-          label="Name"
-          value={search}
-          onChange={(v) => setParam("name", v)}
-          placeholder="Search name…"
-          className="w-44"
-          icon
-        />
-        <FilterSelect
-          label="Floor"
-          value={floorFilter}
-          onChange={(v) => setParam("floor", v)}
-          placeholder="All floors"
-          options={FLOOR_FILTER_OPTIONS}
-          className="w-36"
-        />
-        <FilterSelect
-          label="Status"
-          value={statusFilter}
-          onChange={(v) => setParam("isActive", v)}
-          placeholder="All status"
-          options={STATUS_OPTIONS}
-          className="w-32"
-        />
-      </FilterBar>
-
       <DataTable
+        filter={
+          <FilterBar hasFilters={hasFilters} onClear={clearFilters}>
+            <DebouncedInput
+              label="Name"
+              value={search}
+              onChange={(v) => setParam("name", v)}
+              placeholder="Search name…"
+              className="w-44"
+              icon
+            />
+            <FilterSelect
+              label="Floor"
+              value={floorFilter}
+              onChange={(v) => setParam("floor", v)}
+              placeholder="All floors"
+              options={FLOOR_FILTER_OPTIONS}
+              className="w-36"
+            />
+            <FilterSelect
+              label="Status"
+              value={statusFilter}
+              onChange={(v) => setParam("isActive", v)}
+              placeholder="All status"
+              options={STATUS_OPTIONS}
+              className="w-32"
+            />
+          </FilterBar>
+        }
         columns={columns}
         data={items}
         page={page}

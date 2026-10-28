@@ -100,8 +100,10 @@ export function AssetCombobox({ value, onChange, placeholder = "Filter by assetâ
                   className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent cursor-pointer"
                 >
                   <Check className={cn("h-3.5 w-3.5 shrink-0 text-primary", value === a._id ? "opacity-100" : "opacity-0")} />
-                  <span className="font-mono text-xs text-muted-foreground">{a.code}</span>
-                  <span className="truncate">{a.name}</span>
+                  <div className="flex flex-col items-start text-start">
+                    <span className="font-mono text-xs text-muted-foreground">{a.code}</span>
+                    <span>{a.name}</span>
+                  </div>
                 </button>
               ))
             )}

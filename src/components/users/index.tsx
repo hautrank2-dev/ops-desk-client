@@ -1,29 +1,110 @@
 "use client";
 
-import { Plus, Pencil, Trash2, Loader2, MoreHorizontal, Search } from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
+import { Plus, Pencil, Trash2, Loader2, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
+import { DebouncedInput } from "@/components/ui/filter-bar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { TablePagination } from "@/components/ui/table-pagination";
 import { StatusPill } from "@/components/ui/status-pill";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { USER_ROLE_TONE, USER_STATUS_TONE } from "@/constants/tones";
+import { UserModel } from "@/types/user";
 import { useUsers } from "./hook";
 
 export function UserList() {
   const {
-    items, total, totalPage, isLoading,
+    items, total, totalPage,
     page, setPage, search, setSearch,
     dialogOpen, setDialogOpen, editing,
     departments, form, onSubmit, isPending,
     openCreate, openEdit, deleteMutation,
     UserRoleEnum, UserStatusEnum,
   } = useUsers();
+
+  const columns: ColumnDef<UserModel>[] = [
+    {
+      id: "user",
+      header: "User",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="text-xs font-semibold">
+              {row.original.name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-medium">{row.original.name}</p>
+            <p className="text-xs text-muted-foreground">{row.original.email}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "username",
+      header: "Username",
+      cell: ({ row }) => <span className="font-mono text-[13px] text-foreground/80">{row.original.username}</span>,
+    },
+    {
+      accessorKey: "role",
+      header: "Role",
+      cell: ({ row }) => (
+        <StatusPill tone={USER_ROLE_TONE[row.original.role] ?? "gray"} className="capitalize">
+          {row.original.role}
+        </StatusPill>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <StatusPill dot tone={USER_STATUS_TONE[row.original.status] ?? "gray"} className="capitalize">
+          {row.original.status}
+        </StatusPill>
+      ),
+    },
+    {
+      id: "department",
+      header: "Department",
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground">
+          {departments.find((d) => d._id === row.original.deptId)?.name ?? "—"}
+        </span>
+      ),
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const user = row.original;
+        return (
+          <div className="text-right">
+            <DropdownMenu>
+              <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" className="rounded-full text-muted-foreground" />}>
+                <MoreHorizontal className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => openEdit(user)}>
+                  <Pencil className="h-4 w-4" /> Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => deleteMutation.mutate(user._id)}
+                >
+                  <Trash2 className="h-4 w-4" /> Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -37,99 +118,23 @@ export function UserList() {
         }
       />
 
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            <Input
-              placeholder="Search users..."
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="pl-9"
-            />
-          </div>
-          <span className="text-[13px] text-muted-foreground ml-auto tabular-nums">{total} total</span>
-        </div>
-
-        <div className="rounded-2xl bg-card shadow-soft overflow-clip">
-          <Table wrapperClassName="overflow-auto max-h-[calc(100dvh-340px)]">
-            <TableHeader className="sticky top-0 z-10 bg-card/90 backdrop-blur-xl">
-              <TableRow className="hover:bg-transparent dark:hover:bg-transparent">
-                <TableHead>User</TableHead>
-                <TableHead>Username</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
-                    <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
-                  </TableCell>
-                </TableRow>
-              ) : items.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-40 text-center text-muted-foreground">No users found.</TableCell>
-                </TableRow>
-              ) : items.map((user) => {
-                const dept = departments.find((d) => d._id === user.deptId);
-                return (
-                  <TableRow key={user._id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="text-xs font-semibold">
-                            {user.name.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-medium">{user.name}</p>
-                          <p className="text-xs text-muted-foreground">{user.email}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-mono text-[13px] text-foreground/80">{user.username}</TableCell>
-                    <TableCell>
-                      <StatusPill tone={USER_ROLE_TONE[user.role] ?? "gray"} className="capitalize">
-                        {user.role}
-                      </StatusPill>
-                    </TableCell>
-                    <TableCell>
-                      <StatusPill dot tone={USER_STATUS_TONE[user.status] ?? "gray"} className="capitalize">
-                        {user.status}
-                      </StatusPill>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{dept?.name ?? "—"}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" className="rounded-full text-muted-foreground" />}>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEdit(user)}>
-                            <Pencil className="h-4 w-4" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => deleteMutation.mutate(user._id)}
-                          >
-                            <Trash2 className="h-4 w-4" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-
-        <TablePagination page={page} totalPage={totalPage} total={total} onPageChange={setPage} />
-      </div>
+      <DataTable
+        filter={
+          <DebouncedInput
+            value={search}
+            onChange={(v) => { setSearch(v); setPage(1); }}
+            placeholder="Search users..."
+            className="w-64"
+            icon
+          />
+        }
+        columns={columns}
+        data={items}
+        page={page}
+        totalPage={totalPage}
+        total={total}
+        onPageChange={setPage}
+      />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">

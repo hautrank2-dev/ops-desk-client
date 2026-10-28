@@ -157,31 +157,32 @@ export default function Page() {
     <div className="space-y-6">
       <PageHeader title="Asset Items" description="All registered asset items across the organization." />
 
-      <FilterBar hasFilters={hasFilters} onClear={() => { setFilters(EMPTY); setPage(1); }}>
-        <DebouncedInput value={filters.code} onChange={set("code")} placeholder="Code…" className="w-32" />
-        <DebouncedInput value={filters.serialNumber} onChange={set("serialNumber")} placeholder="Serial No…" className="w-36" />
-        <FilterSelect
-          value={filters.locationId}
-          onChange={set("locationId")}
-          placeholder="All locations"
-          options={locationOptions}
-          className="w-44"
-        />
-        <AssetCombobox
-          value={filters.assetId}
-          onChange={set("assetId")}
-          className="w-56"
-        />
-        <FilterSelect
-          value={filters.status}
-          onChange={set("status")}
-          placeholder="All status"
-          options={STATUS_OPTIONS}
-          className="w-40"
-        />
-      </FilterBar>
-
       <DataTable
+        filter={
+          <FilterBar hasFilters={hasFilters} onClear={() => { setFilters(EMPTY); setPage(1); }}>
+            <DebouncedInput value={filters.code} onChange={set("code")} placeholder="Code…" className="w-32" />
+            <DebouncedInput value={filters.serialNumber} onChange={set("serialNumber")} placeholder="Serial No…" className="w-36" />
+            <FilterSelect
+              value={filters.locationId}
+              onChange={set("locationId")}
+              placeholder="All locations"
+              options={locationOptions}
+              className="w-44"
+            />
+            <AssetCombobox
+              value={filters.assetId}
+              onChange={set("assetId")}
+              className="w-56"
+            />
+            <FilterSelect
+              value={filters.status}
+              onChange={set("status")}
+              placeholder="All status"
+              options={STATUS_OPTIONS}
+              className="w-40"
+            />
+          </FilterBar>
+        }
         columns={columns}
         data={items}
         page={page}
