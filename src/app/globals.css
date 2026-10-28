@@ -62,35 +62,36 @@
 }
 
 .dark {
-  --color-background: #0b0b0d;
-  --color-foreground: #f5f5f7;
+  /* Cobalt-navy dark palette, ported from suptech-ifc-frontend's .dark theme (oklch -> hex) */
+  --color-background: #090d16;
+  --color-foreground: #e7ecf2;
 
-  --color-card: #161618;
-  --color-card-foreground: #f5f5f7;
+  --color-card: #111723;
+  --color-card-foreground: #e7ecf2;
 
-  --color-popover: #1c1c1e;
-  --color-popover-foreground: #f5f5f7;
+  --color-popover: #151c28;
+  --color-popover-foreground: #e7ecf2;
 
-  --color-primary: #0a84ff;
-  --color-primary-foreground: #ffffff;
+  --color-primary: #2b6fdc;
+  --color-primary-foreground: #fafafa;
 
-  --color-secondary: #2c2c2e;
-  --color-secondary-foreground: #f5f5f7;
+  --color-secondary: #1e2735;
+  --color-secondary-foreground: #bfd9ff;
 
-  --color-muted: #1f1f22;
-  --color-muted-foreground: #98989d;
+  --color-muted: #1b222e;
+  --color-muted-foreground: #93a0b1;
 
-  --color-accent: #2c2c2e;
-  --color-accent-foreground: #f5f5f7;
+  --color-accent: #1d293d;
+  --color-accent-foreground: #cae0ff;
 
-  --color-destructive: #ff453a;
+  --color-destructive: #f54748;
   --color-destructive-foreground: #ffffff;
 
-  --color-border: rgb(255 255 255 / 0.08);
-  --color-input: rgb(255 255 255 / 0.12);
-  --color-ring: #0a84ff;
+  --color-border: #252e3d;
+  --color-input: #2f3848;
+  --color-ring: #4884e5;
 
-  --color-sidebar: #111113;
+  --color-sidebar: #0e141f;
 
   --shadow-ring: rgb(255 255 255 / 0.06);
   --shadow-tint: rgb(0 0 0 / 0.35);
