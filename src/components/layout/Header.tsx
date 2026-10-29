@@ -1,6 +1,6 @@
 "use client";
 
-import { Sun, Moon, Monitor, LogOut, User } from 'lucide-react';
+import { Sun, Moon, Monitor, LogOut, User, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useTheme } from '@/hooks/use-theme';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +16,12 @@ import { MobileSidebar } from './Sidebar';
 import { AppBreadcrumb } from './Breadcrumb';
 import { LOCAL_KEYS } from '@/constants/local';
 
-export function Header() {
+type HeaderProps = {
+  sidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
+};
+
+export function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProps) {
   const { theme, setTheme } = useTheme();
 
   return (
@@ -24,6 +29,17 @@ export function Header() {
       <div className="flex h-full items-center gap-3 px-4 md:px-8">
         {/* Mobile: hamburger */}
         <MobileSidebar />
+
+        {/* Desktop: collapse / expand sidebar */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggleSidebar}
+          title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="hidden md:inline-flex -ml-2 rounded-full text-foreground/70"
+        >
+          {sidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+        </Button>
 
         {/* Breadcrumb — takes remaining space */}
         <div className="flex-1 min-w-0">

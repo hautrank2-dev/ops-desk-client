@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Package, Ticket, Users, Building2,
-  Settings, Menu, ChevronLeft, MapPin, Layers,
+  Settings, Menu, MapPin, Layers,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -44,11 +44,10 @@ const navItemActive =
 
 type SidebarProps = {
   collapsed?: boolean;
-  onToggle?: () => void;
   className?: string;
 };
 
-export function Sidebar({ collapsed = false, onToggle, className }: SidebarProps) {
+export function Sidebar({ collapsed = false, className }: SidebarProps) {
   const pathname = usePathname() || "";
 
   const isGroupActive = (item: NavItem) =>
@@ -131,18 +130,6 @@ export function Sidebar({ collapsed = false, onToggle, className }: SidebarProps
         })}
       </nav>
 
-      {/* Collapse toggle — desktop only */}
-      {onToggle && (
-        <div className={cn("p-3", collapsed ? "flex justify-center" : "flex justify-end")}>
-          <button
-            onClick={onToggle}
-            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            <ChevronLeft className={cn("h-4 w-4 transition-transform duration-200 ease-apple", collapsed && "rotate-180")} />
-          </button>
-        </div>
-      )}
     </div>
   );
 }

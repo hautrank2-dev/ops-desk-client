@@ -32,31 +32,38 @@ const AppContext = createContext<AppContextValue>({
   refetchDepartments: async () => { },
 });
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [authPayload, setAuthPayload] = useState<AuthPayloadModel | null>(() => {
-    try {
-      const authJson = localStorage.getItem(LOCAL_KEYS.USER);
-      if (typeof authJson === 'string') {
-        const auth = JSON.parse(authJson);
-        if (typeof auth === 'object') {
-          const _id = auth._id;
-          const username = auth.username;
-          const role = auth.role;
+const readAuthPayload = (): AuthPayloadModel | null => {
+  try {
+    const authJson = localStorage.getItem(LOCAL_KEYS.USER);
+    if (typeof authJson === 'string') {
+      const auth = JSON.parse(authJson);
+      if (typeof auth === 'object') {
+        const _id = auth._id;
+        const username = auth.username;
+        const role = auth.role;
 
-          if (
-            typeof _id === 'string' &&
-            typeof username === 'string' &&
-            (Object.values(UserRoleEnum) as string[]).includes(role)
-          ) {
-            return { _id, username, role } satisfies AuthPayloadModel;
-          }
+        if (
+          typeof _id === 'string' &&
+          typeof username === 'string' &&
+          (Object.values(UserRoleEnum) as string[]).includes(role)
+        ) {
+          return { _id, username, role } satisfies AuthPayloadModel;
         }
       }
-    } catch (err) {
-      console.log(err);
     }
-    return null;
-  })
+  } catch (err) {
+    console.log(err);
+  }
+  return null;
+};
+
+export function AppProvider({ children }: { children: React.ReactNode }) {
+  // Đọc sau khi mount: lúc SSR không có localStorage, và render đầu trên
+  // client phải khớp SSR (null) để không vỡ hydration.
+  const [authPayload, setAuthPayload] = useState<AuthPayloadModel | null>(null);
+  useEffect(() => {
+    setAuthPayload(readAuthPayload());
+  }, []);
   const [locations, setLocations] = useState<LocationModel[]>([]);
   const [locationsLoading, setLocationsLoading] = useState(false);
   const [departments, setDepartments] = useState<DepartmentModel[]>([]);

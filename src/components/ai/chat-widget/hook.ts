@@ -8,7 +8,7 @@ import {
   AiConversationSummaryModel,
   TableResponse,
 } from "@/types";
-import { ChatSseEvent, ChatUiMessage } from "./type";
+import { ChatCorner, ChatSseEvent, ChatUiMessage } from "./type";
 
 export const SUGGESTED_QUESTIONS = [
   "What's the hardest and most urgent ticket?",
@@ -16,6 +16,8 @@ export const SUGGESTED_QUESTIONS = [
   "Summarize tickets that are overdue.",
   "What can you help me with?",
 ];
+
+export const CHAT_CORNERS: ChatCorner[] = ["top-left", "top-right", "bottom-left", "bottom-right"];
 
 const genLocalId = () =>
   `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -47,13 +49,6 @@ export function useChatWidget() {
   const params = useParams<{ id?: string }>();
   const ticketId = pathname.startsWith("/tickets/") && params.id ? params.id : undefined;
 
-  // AppContext đọc authPayload từ localStorage trong initializer của
-  // useState, nên SSR luôn thấy null còn client thấy giá trị thật ngay —
-  // render theo authed trực tiếp sẽ vỡ hydration (server: null, client:
-  // button). Đợi qua 1 effect để lần render đầu trên client khớp SSR.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
   const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -64,17 +59,29 @@ export function useChatWidget() {
   const [conversations, setConversations] = useState<AiConversationSummaryModel[]>([]);
   const [conversationsLoading, setConversationsLoading] = useState(false);
 
+  const [corner, setCornerState] = useState<ChatCorner>("bottom-right");
+
   const abortRef = useRef<AbortController | null>(null);
 
-  // Mở lại đúng hội thoại đang dở sau khi F5 (conversationId lưu local,
-  // tin nhắn lấy lại từ server).
+  useEffect(() => {
+    const saved = localStorage.getItem(LOCAL_KEYS.AI_WIDGET_CORNER);
+    if (CHAT_CORNERS.includes(saved as ChatCorner)) setCornerState(saved as ChatCorner);
+  }, []);
+
+  const setCorner = (next: ChatCorner) => {
+    setCornerState(next);
+    localStorage.setItem(LOCAL_KEYS.AI_WIDGET_CORNER, next);
+  };
+
+  // Reopen the in-progress conversation after a reload (conversationId is
+  // stored locally, messages are refetched from the server).
   useEffect(() => {
     const savedId = localStorage.getItem(LOCAL_KEYS.AI_CONVERSATION_ID);
     if (savedId) void openConversation(savedId, { keepOpenState: true });
   }, []);
 
-  // Panel cố định trên desktop, Sheet trên mobile — Sheet portal ra
-  // document.body nên phải chọn 1 trong 2 bằng JS, CSS ẩn/hiện không chặn được portal.
+  // Fixed panel on desktop, Sheet on mobile — Sheet portals to document.body,
+  // so the choice must be made in JS; CSS show/hide can't stop the portal.
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 639px)");
     const update = () => setIsMobile(mq.matches);
@@ -113,6 +120,7 @@ export function useChatWidget() {
           id: genLocalId(),
           role: m.role,
           text: m.text,
+          cards: m.cards,
         })),
       );
       localStorage.setItem(LOCAL_KEYS.AI_CONVERSATION_ID, data.id);
@@ -155,6 +163,8 @@ export function useChatWidget() {
       role: "assistant",
       text: "",
       thinking: "",
+      tools: [],
+      cards: [],
       streaming: true,
     };
     setMessages((prev) => [...prev, userMsg, assistantMsg]);
@@ -172,8 +182,8 @@ export function useChatWidget() {
     try {
       const token = localStorage.getItem(LOCAL_KEYS.TOKEN);
       const baseUrl = httpClient.defaults.baseURL ?? "/api";
-      // Ngoại lệ duy nhất dùng fetch thay httpClient: chat là SSE qua POST,
-      // EventSource không gửi được body POST.
+      // The only place using fetch instead of httpClient: chat is SSE over POST,
+      // and EventSource can't send a POST body.
       const response = await fetch(`${baseUrl}/ai/chat`, {
         method: "POST",
         headers: {
@@ -212,6 +222,16 @@ export function useChatWidget() {
           } else if (evt.event === "thinking") {
             assistantMsg.thinking = (assistantMsg.thinking ?? "") + evt.data.text;
             patchAssistant({ thinking: assistantMsg.thinking });
+          } else if (evt.event === "tool") {
+            const tools = assistantMsg.tools ?? [];
+            const exists = tools.some((t) => t.id === evt.data.id);
+            assistantMsg.tools = exists
+              ? tools.map((t) => (t.id === evt.data.id ? evt.data : t))
+              : [...tools, evt.data];
+            patchAssistant({ tools: assistantMsg.tools });
+          } else if (evt.event === "card") {
+            assistantMsg.cards = [...(assistantMsg.cards ?? []), evt.data];
+            patchAssistant({ cards: assistantMsg.cards });
           } else if (evt.event === "text") {
             hasText = true;
             assistantMsg.text += evt.data.text;
@@ -243,10 +263,12 @@ export function useChatWidget() {
   };
 
   return {
-    ready: mounted && !!authPayload,
+    ready: !!authPayload,
     open,
     setOpen,
     isMobile,
+    corner,
+    setCorner,
     historyOpen,
     toggleHistory,
     input,

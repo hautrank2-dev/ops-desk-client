@@ -17,6 +17,7 @@ import { StatusPill } from "@/components/ui/status-pill";
 import { ImageGroup, Image } from "@/components/ui/image";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TICKET_PRIORITY_TONE, TICKET_STATUS_TONE } from "@/constants/tones";
+import { CopyButton } from "@/components/ui/copy-button";
 
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
@@ -67,7 +68,7 @@ export function TicketDetail({ id }: { id: string }) {
         onBack={() => router.back()}
         eyebrow={
           <>
-            <span className="font-mono text-[13px] text-muted-foreground">{ticket.code}</span>
+            <span className="inline-flex items-center gap-1"><span className="font-mono text-[13px] text-muted-foreground">{ticket.code}</span><CopyButton value={ticket.code} /></span>
             <StatusPill dot tone={TICKET_STATUS_TONE[ticket.status]}>{ticket.status}</StatusPill>
             <StatusPill tone={TICKET_PRIORITY_TONE[ticket.priority]}>{ticket.priority}</StatusPill>
           </>

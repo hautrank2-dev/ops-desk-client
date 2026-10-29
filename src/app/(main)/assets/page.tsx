@@ -18,6 +18,7 @@ import { AssetModel, AssetType, TableResponse } from "@/types";
 import { httpClient } from "@/lib/httpClient";
 import { StatusPill } from "@/components/ui/status-pill";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { CopyButton } from "@/components/ui/copy-button";
 
 const PAGE_SIZE = 10;
 
@@ -80,11 +81,14 @@ export default function Page() {
       accessorKey: "code",
       header: "Code",
       cell: ({ row }) => (
+        <span className="inline-flex items-center gap-1">
         <span
           className="font-mono text-[13px] font-medium text-primary cursor-pointer hover:underline underline-offset-4"
           onClick={(e) => { e.stopPropagation(); router.push(`/assets/${row.original._id}?tab=items`); }}
         >
-          {row.getValue("code")}
+          {row.original.code}
+        </span>
+        <CopyButton value={row.original.code} />
         </span>
       ),
     },

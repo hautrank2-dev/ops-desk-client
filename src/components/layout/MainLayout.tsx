@@ -17,7 +17,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           className="fixed top-0 left-0 h-screen z-30 hidden md:block"
           style={{ width: sidebarW, transition: "width 200ms cubic-bezier(0.25, 0.1, 0.25, 1)" }}
         >
-          <Sidebar collapsed={collapsed} onToggle={toggle} className="h-full" />
+          <Sidebar collapsed={collapsed} className="h-full" />
         </aside>
 
 
@@ -26,7 +26,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         <SidebarSpacer sidebarW={sidebarW}>
           {/* Fixed header */}
           <header className="sticky top-0 left-0 right-0 z-40 h-[var(--header-height)]">
-            <Header />
+            <Header sidebarCollapsed={collapsed} onToggleSidebar={toggle} />
           </header>
           <main>
             <div className="px-4 py-6 sm:px-6 md:px-8 md:py-8 max-w-[1440px] mx-auto space-y-6">

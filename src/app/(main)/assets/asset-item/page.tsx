@@ -14,6 +14,7 @@ import { formatDate } from "@/lib/formatDate";
 import { StatusPill } from "@/components/ui/status-pill";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ITEM_STATUS_TONE } from "@/constants/tones";
+import { CopyButton } from "@/components/ui/copy-button";
 
 const PAGE_SIZE = 20;
 
@@ -98,11 +99,14 @@ export default function Page() {
         if (!a) return <span className="text-muted-foreground">—</span>;
         if (typeof a === "object") {
           return (
+            <span className="inline-flex items-center gap-1">
             <span
               className="font-mono text-[13px] text-primary cursor-pointer hover:underline underline-offset-4"
               onClick={() => router.push(`/assets/${a._id}/asset-item`)}
             >
               {a.code}
+            </span>
+            <CopyButton value={a.code} />
             </span>
           );
         }

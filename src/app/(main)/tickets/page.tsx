@@ -25,6 +25,7 @@ import { httpClient } from "@/lib/httpClient";
 import { StatusPill } from "@/components/ui/status-pill";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TICKET_PRIORITY_TONE, TICKET_STATUS_TONE } from "@/constants/tones";
+import { CopyButton } from "@/components/ui/copy-button";
 
 const PAGE_SIZE = 10;
 
@@ -127,7 +128,12 @@ export default function Page() {
     {
       accessorKey: "code",
       header: "Code",
-      cell: ({ row }) => <span className="font-mono text-[13px] font-medium text-primary">{row.getValue("code")}</span>,
+      cell: ({ row }) => (
+        <span className="inline-flex items-center gap-1">
+          <span className="font-mono text-[13px] font-medium text-primary">{row.original.code}</span>
+          <CopyButton value={row.original.code} />
+        </span>
+      ),
     },
     {
       accessorKey: "title",

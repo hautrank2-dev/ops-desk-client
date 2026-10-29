@@ -12,6 +12,7 @@ import { AssetImagesTab } from "@/components/assets/tabs/AssetImagesTab";
 import { AssetItemsTab } from "@/components/assets/tabs/AssetItemsTab";
 import { AssetModel } from "@/types/asset";
 import { httpClient } from "@/lib/httpClient";
+import { CopyButton } from "@/components/ui/copy-button";
 
 type Tab = "items" | "info" | "images";
 const TABS: Tab[] = ["items", "info", "images"];
@@ -46,7 +47,7 @@ export default function Page() {
       {/* Header */}
       <PageHeader
         onBack={() => router.push("/assets")}
-        title={isLoading ? <Loader2 className="h-6 w-6 my-1 animate-spin text-muted-foreground" /> : asset?.code}
+        title={isLoading ? <Loader2 className="h-6 w-6 my-1 animate-spin text-muted-foreground" /> : <span className="inline-flex items-center gap-2">{asset?.code}<CopyButton value={asset?.code} /></span>}
         description={isLoading ? undefined : asset?.name}
       />
 

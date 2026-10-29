@@ -5,10 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Save, Loader2 } from "lucide-react";
+import { ChevronLeft, Save, Loader2, RefreshCw } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,6 +27,7 @@ import { TicketComment } from "./TicketComment";
 import { UserSelect } from "@/components/selects/UserSelect";
 import { StatusPill } from "@/components/ui/status-pill";
 import { TICKET_PRIORITY_TONE, TICKET_STATUS_TONE } from "@/constants/tones";
+import { CopyButton } from "@/components/ui/copy-button";
 
 const ticketSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters"),
@@ -50,7 +52,7 @@ export function TicketForm({ id }: { id?: string }) {
   const queryClient = useQueryClient();
   const isEdit = !!id;
 
-  const { data: ticket, isLoading } = useQuery<TicketModel>({
+  const { data: ticket, isLoading, isFetching, refetch } = useQuery<TicketModel>({
     queryKey: ["ticket", id],
     queryFn: async () => {
       const { data } = await httpClient.get(`/ticket/${id}`, {
@@ -256,7 +258,7 @@ export function TicketForm({ id }: { id?: string }) {
             <div className="text-[13px] text-muted-foreground mt-0.5 flex items-center gap-2 truncate">
               {isEdit ? (
                 <>
-                  <span className="font-mono">{ticket?.code}</span>
+                  <span className="inline-flex items-center gap-1"><span className="font-mono">{ticket?.code}</span><CopyButton value={ticket?.code} /></span>
                   <span>·</span>
                   <span className="flex items-center gap-1.5">Assigned to <UserCell user={ticket?.assigneeId} /></span>
                 </>
@@ -264,6 +266,21 @@ export function TicketForm({ id }: { id?: string }) {
             </div>
           </div>
         </div>
+        {isEdit && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isFetching}
+            onClick={() => {
+              void refetch();
+              void queryClient.invalidateQueries({ queryKey: ["ticket-comments", id] });
+            }}
+          >
+            <RefreshCw className={cn(isFetching && "animate-spin")} />
+            Reload
+          </Button>
+        )}
       </div>
 
       {isEdit && id ? (
