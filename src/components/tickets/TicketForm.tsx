@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Save, Loader2, RefreshCw } from "lucide-react";
+import { Bot, ChevronLeft, Save, Loader2, RefreshCw } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,10 @@ import { ImageManager } from "@/components/ui/image-manager";
 import { UserCell } from "@/components/ui/user-cell";
 import { TicketModel, TicketPriority, TicketStatus, TicketType } from "@/types/ticket";
 import { UserModel } from "@/types/user";
+import { useAgent } from "@/contexts/AgentContext";
 import { httpClient } from "@/lib/httpClient";
 import { fileUrl } from "@/lib/fileUrl";
+import { DatePicker } from "@/components/ui/date-picker";
 import { formatDate } from "@/lib/formatDate";
 import { TicketComment } from "./TicketComment";
 import { UserSelect } from "@/components/selects/UserSelect";
@@ -50,6 +52,7 @@ const idOf = (user?: string | UserModel | null) => (typeof user === "string" ? u
 export function TicketForm({ id }: { id?: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { askAgent, isStreaming } = useAgent();
   const isEdit = !!id;
 
   const { data: ticket, isLoading, isFetching, refetch } = useQuery<TicketModel>({
@@ -173,7 +176,7 @@ export function TicketForm({ id }: { id?: string }) {
             </FormItem>
           )} />
           <FormField control={form.control} name="dueAt" render={({ field }) => (
-            <FormItem><FormLabel>Due Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>Due Date</FormLabel><FormControl><DatePicker value={field.value} onChange={field.onChange} onBlur={field.onBlur} /></FormControl><FormMessage /></FormItem>
           )} />
         </div>
 
@@ -225,6 +228,17 @@ export function TicketForm({ id }: { id?: string }) {
           <div className="flex items-center gap-2">
             {updateMutation.isSuccess && !form.formState.isDirty && <span className="text-[13px] text-muted-foreground">Saved</span>}
             {!isEdit && <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>}
+            {isEdit && ticket && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isStreaming}
+                onClick={() => askAgent(`How should I resolve ticket ${ticket.code}? Read its details and comments, then suggest likely causes and concrete next steps.`)}
+              >
+                <Bot className="h-4 w-4" />
+                How to resolve
+              </Button>
+            )}
             <Button type="submit" disabled={isPending}>
               {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               {isEdit ? "Save" : "Create Ticket"}

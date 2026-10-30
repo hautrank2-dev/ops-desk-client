@@ -151,7 +151,7 @@ export function useChatWidget() {
     abortRef.current?.abort();
   };
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = async (text: string, opts?: { newConversation?: boolean }) => {
     const message = text.trim();
     if (!message || isStreaming) return;
 
@@ -191,7 +191,7 @@ export function useChatWidget() {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          conversationId: conversationId ?? undefined,
+          conversationId: opts?.newConversation ? undefined : conversationId ?? undefined,
           message,
           context: { route: pathname, ticketId },
         }),
@@ -262,6 +262,15 @@ export function useChatWidget() {
     }
   };
 
+  // Entry point for other screens: opens the chat and asks in a fresh
+  // conversation. While a reply is streaming it only opens the chat.
+  const askAgent = (text: string) => {
+    setOpen(true);
+    if (isStreaming) return;
+    startNewConversation();
+    void sendMessage(text, { newConversation: true });
+  };
+
   return {
     ready: !!authPayload,
     open,
@@ -278,6 +287,7 @@ export function useChatWidget() {
     conversations,
     conversationsLoading,
     sendMessage,
+    askAgent,
     stop,
     openConversation,
     startNewConversation,

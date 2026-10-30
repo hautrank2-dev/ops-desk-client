@@ -33,7 +33,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatDate } from "@/lib/formatDate";
 import { cn } from "@/lib/utils";
 import { TicketRankingCard } from "../ticket-ranking-card";
-import { CHAT_CORNERS, SUGGESTED_QUESTIONS, useChatWidget } from "./hook";
+import { useAgent } from "@/contexts/AgentContext";
+import { CHAT_CORNERS, SUGGESTED_QUESTIONS } from "./hook";
 import { ChatCorner, ChatToolCall, ChatUiMessage } from "./type";
 
 // Toggle button sits in the chosen corner; the panel opens next to it, on the inner side.
@@ -65,6 +66,7 @@ const TOOL_LABELS: Record<string, string> = {
   get_ticket: "Reading ticket",
   get_ticket_stats: "Counting tickets",
   search_users: "Looking up users",
+  assign_ticket: "Assigning ticket",
   present_ranking: "Building ranking",
 };
 
@@ -105,9 +107,10 @@ const ChatBubble = ({ message, onNavigate }: { message: ChatUiMessage; onNavigat
       )}
       <div
         className={cn(
-          "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
+          // min-w-0 + overflow-wrap: chuỗi dài không dấu cách (JSON lỗi, URL) không làm tràn khung chat.
+          "max-w-[85%] min-w-0 rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed [overflow-wrap:anywhere]",
           isUser
-            ? "bg-primary text-primary-foreground"
+            ? "bg-primary/10"
             : message.error
               ? "bg-destructive/10 text-destructive"
               : "bg-muted text-foreground",
@@ -116,7 +119,7 @@ const ChatBubble = ({ message, onNavigate }: { message: ChatUiMessage; onNavigat
         {isUser ? (
           <span className="whitespace-pre-wrap">{message.text}</span>
         ) : message.text ? (
-          <div className="[&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-semibold [&_code]:rounded [&_code]:bg-black/[0.06] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[13px] dark:[&_code]:bg-white/[0.08] [&_table]:my-2 [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto [&_table]:border-collapse [&_table]:text-xs [&_th]:border [&_th]:border-border [&_th]:bg-background/60 [&_th]:px-2 [&_th]:py-1 [&_th]:text-left [&_th]:font-semibold [&_th]:whitespace-nowrap [&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1 [&_td]:whitespace-nowrap [&_a]:text-primary [&_a]:underline">
+          <div className="[&_p]:mb-2 [&_p:last-child]:mb-0 [&_ul]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-semibold [&_code]:rounded [&_code]:bg-black/[0.06] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[13px] dark:[&_code]:bg-white/[0.08] [&_pre]:my-2 [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-black/[0.06] [&_pre]:p-2.5 [&_pre]:text-xs [&_pre]:leading-normal [&_pre]:[overflow-wrap:normal] dark:[&_pre]:bg-white/[0.08] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-xs [&_pre_code]:whitespace-pre [&_table]:my-2 [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto [&_table]:border-collapse [&_table]:text-xs [&_th]:border [&_th]:border-border [&_th]:bg-background/60 [&_th]:px-2 [&_th]:py-1 [&_th]:text-left [&_th]:font-semibold [&_th]:whitespace-nowrap [&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1 [&_td]:whitespace-nowrap [&_a]:text-primary [&_a]:underline">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
           </div>
         ) : message.streaming && !hasCards ? (
@@ -154,7 +157,7 @@ export const ChatWidget = () => {
     openConversation,
     startNewConversation,
     deleteConversation,
-  } = useChatWidget();
+  } = useAgent();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(() => getStatusScroll(null));

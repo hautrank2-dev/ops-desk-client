@@ -5,6 +5,7 @@ import { ListFilter, Search, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { cn } from "@/lib/utils";
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 import { ChevronDownIcon, CheckIcon } from "lucide-react";
@@ -165,7 +166,7 @@ export function FilterBar({ children, onClear, hasFilters }: FilterBarProps) {
   );
 }
 
-// ── Date range (two native date inputs) ───────────────────────────────────────
+// ── Date range (two date pickers) ───────────────────────────────────────
 type DateRangeFilterProps = {
   label?: string;
   start: string;
@@ -177,9 +178,9 @@ export function DateRangeFilter({ label, start, end, onChange }: DateRangeFilter
   return (
     <FilterLabel label={label}>
       <div className="flex items-center gap-1.5">
-        <Input type="date" value={start} max={end || undefined} onChange={(e) => onChange({ start: e.target.value, end })} className="h-9 text-sm" />
+        <DatePicker value={start} max={end || undefined} onChange={(v) => onChange({ start: v, end })} className="w-36" />
         <span className="text-muted-foreground text-xs">→</span>
-        <Input type="date" value={end} min={start || undefined} onChange={(e) => onChange({ start, end: e.target.value })} className="h-9 text-sm" />
+        <DatePicker value={end} min={start || undefined} onChange={(v) => onChange({ start, end: v })} className="w-36" />
       </div>
     </FilterLabel>
   );
