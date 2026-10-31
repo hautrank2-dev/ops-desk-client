@@ -17,7 +17,7 @@ export type AssetItemStatus = ItemStatus;
 export type AssetItemModel = {
   _id: string;
   code?: string;
-  asset: AssetModel | string;
+  assetId: AssetModel | string | null;
   serialNumber?: string;
   status: ItemStatus;
   locationId?: string | null;

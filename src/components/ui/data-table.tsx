@@ -42,7 +42,6 @@ type DataTableProps<TData, TValue> = {
   total?: number
   totalPage?: number
   onPageChange?: (page: number) => void
-  onRowClick?: (row: TData) => void
   // row selection
   enableRowSelection?: boolean
   onSelectionChange?: (rows: TData[]) => void
@@ -57,7 +56,6 @@ export function DataTable<TData, TValue>({
   totalPage,
   total,
   onPageChange,
-  onRowClick,
   enableRowSelection,
   onSelectionChange,
   getRowId,
@@ -183,17 +181,9 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className={cn(onRowClick && "cursor-pointer")}
-                >
-                  {row.getVisibleCells().map((cell, cellIndex) => (
-                    <TableCell
-                      key={cell.id}
-                      onClick={cellIndex === 0 && onRowClick ? () => onRowClick(row.original) : undefined}
-                      className={cn(cellIndex === 0 && onRowClick && "font-medium hover:text-primary hover:underline underline-offset-4 decoration-primary/40")}
-                    >
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Plus, MoreHorizontal, Pencil, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
@@ -18,7 +17,7 @@ import { AssetModel, AssetType, TableResponse } from "@/types";
 import { httpClient } from "@/lib/httpClient";
 import { StatusPill } from "@/components/ui/status-pill";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { CopyButton } from "@/components/ui/copy-button";
+import { CodeLink } from "@/components/ui/code-link";
 
 const PAGE_SIZE = 10;
 
@@ -40,7 +39,6 @@ type Filters = {
 const EMPTY: Filters = { code: "", name: "", type: "", vendor: "", model: "", active: "" };
 
 export default function Page() {
-  const router = useRouter();
   const [assets, setAssets] = useState<AssetModel[]>([]);
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
@@ -80,17 +78,7 @@ export default function Page() {
     {
       accessorKey: "code",
       header: "Code",
-      cell: ({ row }) => (
-        <span className="inline-flex items-center gap-1">
-        <span
-          className="font-mono text-[13px] font-medium text-primary cursor-pointer hover:underline underline-offset-4"
-          onClick={(e) => { e.stopPropagation(); router.push(`/assets/${row.original._id}?tab=items`); }}
-        >
-          {row.original.code}
-        </span>
-        <CopyButton value={row.original.code} />
-        </span>
-      ),
+      cell: ({ row }) => <CodeLink href={`/assets/${row.original._id}?tab=items`} code={row.original.code} />,
     },
     { accessorKey: "name", header: "Name", cell: ({ row }) => <span className="font-medium">{row.getValue("name")}</span> },
     {

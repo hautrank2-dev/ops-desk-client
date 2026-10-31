@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/data-table";
 import { FilterBar, DebouncedInput, FilterSelect } from "@/components/ui/filter-bar";
@@ -14,7 +14,7 @@ import { formatDate } from "@/lib/formatDate";
 import { StatusPill } from "@/components/ui/status-pill";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ITEM_STATUS_TONE } from "@/constants/tones";
-import { CopyButton } from "@/components/ui/copy-button";
+import { CodeLink } from "@/components/ui/code-link";
 
 const PAGE_SIZE = 20;
 
@@ -31,7 +31,6 @@ type Filters = {
 const EMPTY: Filters = { code: "", serialNumber: "", locationId: "", assetId: "", status: "" };
 
 export default function Page() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { locations } = useApp();
 
@@ -58,7 +57,7 @@ export default function Page() {
       try {
         const params: Record<string, unknown> = {
           page, pageSize: PAGE_SIZE,
-          populations: ["createdBy"],
+          populations: ["createdBy", "assetId"],
         };
         if (filters.code) params.code = filters.code;
         if (filters.serialNumber) params.serialNumber = filters.serialNumber;
@@ -85,31 +84,21 @@ export default function Page() {
     {
       accessorKey: "code",
       header: "Code",
-      cell: ({ row }) => (
-        <span className="font-mono text-[13px] font-medium text-primary">
-          {row.original.code ?? row.original._id.slice(-8).toUpperCase()}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const a = row.original.assetId;
+        const code = row.original.code ?? row.original._id.slice(-8).toUpperCase();
+        // Items have no page of their own — they are managed on their asset's Items tab.
+        if (a && typeof a === "object") return <CodeLink href={`/assets/${a._id}?tab=items`} code={code} />;
+        return <span className="font-mono text-[13px] font-medium text-primary">{code}</span>;
+      },
     },
     {
       id: "asset",
       header: "Asset",
       cell: ({ row }) => {
-        const a = row.original.asset;
+        const a = row.original.assetId;
         if (!a) return <span className="text-muted-foreground">—</span>;
-        if (typeof a === "object") {
-          return (
-            <span className="inline-flex items-center gap-1">
-            <span
-              className="font-mono text-[13px] text-primary cursor-pointer hover:underline underline-offset-4"
-              onClick={() => router.push(`/assets/${a._id}/asset-item`)}
-            >
-              {a.code}
-            </span>
-            <CopyButton value={a.code} />
-            </span>
-          );
-        }
+        if (typeof a === "object") return <CodeLink href={`/assets/${a._id}?tab=items`} code={a.code} />;
         return <span className="font-mono text-xs text-muted-foreground">{a}</span>;
       },
     },

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Plus, MoreHorizontal, Pencil, Eye, AlertTriangle } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,7 @@ import { httpClient } from "@/lib/httpClient";
 import { StatusPill } from "@/components/ui/status-pill";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { TICKET_PRIORITY_TONE, TICKET_STATUS_TONE } from "@/constants/tones";
-import { CopyButton } from "@/components/ui/copy-button";
+import { CodeLink } from "@/components/ui/code-link";
 
 const PAGE_SIZE = 10;
 
@@ -73,7 +72,6 @@ const dayStart = (d: string) => (d ? new Date(`${d}T00:00:00`).toISOString() : u
 const dayEnd = (d: string) => (d ? new Date(`${d}T23:59:59.999`).toISOString() : undefined);
 
 export default function Page() {
-  const router = useRouter();
   const [tickets, setTickets] = useState<TicketModel[]>([]);
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
@@ -128,12 +126,7 @@ export default function Page() {
     {
       accessorKey: "code",
       header: "Code",
-      cell: ({ row }) => (
-        <span className="inline-flex items-center gap-1">
-          <span className="font-mono text-[13px] font-medium text-primary">{row.original.code}</span>
-          <CopyButton value={row.original.code} />
-        </span>
-      ),
+      cell: ({ row }) => <CodeLink href={`/tickets/${row.original._id}`} code={row.original.code} />,
     },
     {
       accessorKey: "title",
@@ -260,7 +253,6 @@ export default function Page() {
         totalPage={totalPage}
         total={total}
         onPageChange={setPage}
-        onRowClick={(ticket) => router.push(`/tickets/${ticket._id}`)}
       />
     </div>
   );
