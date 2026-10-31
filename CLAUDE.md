@@ -62,6 +62,7 @@ Coding conventions live in their own files. Read them before writing code:
 | --- | --- | --- |
 | `docs/rules/source-code-rule.md` | TypeScript, style, naming, components, hooks, reuse, styling | always (imported above) |
 | `docs/rules/complex-component-rule.md` | the `index.tsx` / `hook.ts` / `type.ts` split | always (imported above) |
+| `.claude/rules/http-client.md` | API calls use `httpClient` only, never `fetch` | `src/**/*.{ts,tsx}` |
 | `.claude/rules/ui-popover.md` | dropdowns / comboboxes / floating panels use shadcn `Popover` | `src/**/*.tsx` |
 | `.claude/rules/select-async.md` | entity selects (`UserSelect`, …): 20 per page, lazy + infinite load, server search | select / combobox files |
 | `.claude/rules/image.md` | every content image opens the viewer (`Image`, `ImageGroup`) | `src/**/*.tsx` |
